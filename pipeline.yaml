@@ -71,16 +71,44 @@ training:
 
     # WHAT MODEL SHOULD WE USE?
     model:
-        name: xg_boost_regression
+        # name: xg_boost_regression
+        # params:
+        #     n_estimators: 5
+        #     max_depth: 2
+        #     learning_rate: 0.1
+        #     subsample: 0.8
+        #     cross_validation:
+        #         min: 1e-3
+        #         max: 1e2
+        # name: linear_regression
+        # params: {}
+        # name: xg_boost
+        # params:
+        #     n_estimators: 5
+        #     max_depth: 2
+        #     learning_rate: 0.1
+        #     subsample: 0.8
+        # name: svr
+        # params:
+        #     C: 1.0
+        #     epsilon: 0.1
+        #     kernel: rbf
+        #     n_splits: 3
+        # name: cat_boost
+        # params:
+        #     iterations: 100
+        #     learning_rate: 0.1
+        #     depth: 6
+        #     l2_leaf_reg: 3.0
+        #     loss_function: RMSE
+        name: mlp_regressor
         params:
-            n_estimators: 5
-            max_depth: 2
-            learning_rate: 0.1
-            subsample: 0.8
-            cross_validation:
-                min: 1e-3
-                max: 1e2
-
+            hidden_layer_sizes: [100, 50]
+            activation: relu
+            solver: adam
+            alpha: 0.001
+            learning_rate: constant
+            max_iter: 300
     # model:
     #     name: linear_regression
     #     params: {}

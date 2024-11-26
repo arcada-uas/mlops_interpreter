@@ -4,5 +4,7 @@ pyyaml
 cassandra-driver
 numpy
 pydantic
-
+assertpy
 xgboost
+black
+catboost
