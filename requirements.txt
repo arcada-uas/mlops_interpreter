@@ -1,0 +1,8 @@
+scikit-learn
+pandas
+pyyaml
+cassandra-driver
+numpy
+pydantic
+
+xgboost
