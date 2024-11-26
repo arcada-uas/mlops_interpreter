@@ -130,3 +130,11 @@ def build_and_validate_schema(sample_row, expected_schema):
 
     # MAKE SURE EACH ROW SCHEMA MATCHES
     validate_schema(sample_row, reference_schema)
+
+################################################################################################
+################################################################################################
+
+# VALIDATE INPUT DICT WITH GIVEN PYDANTIC SCHEMA
+def validate_params(input_dict, input_schema):
+    assert isinstance(input_dict, dict), f"ARG 'input_params' MUST BE OF TYPE DICT, GOT {type(input_dict)}"
+    return input_schema(**input_dict)

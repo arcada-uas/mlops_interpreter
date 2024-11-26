@@ -1,5 +1,5 @@
 from common.misc import create_repository, option
-from components.features import shift_column, stochastic_k, to_float_matrix
+from components.features import shift_column, stochastic_k
 from components.features import to_dataframe, drop_nan_rows, extract_columns
 
 repository = create_repository({
@@ -26,9 +26,5 @@ repository = create_repository({
     'extract_columns': option(
         extract_columns.custom_feature,
         extract_columns.tests
-    ),
-    'to_float_matrix': option(
-        to_float_matrix.custom_feature,
-        to_float_matrix.tests
     ),
 }, label='feature')

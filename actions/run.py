@@ -1,6 +1,5 @@
 from common import misc, types
 from sklearn.pipeline import Pipeline
-import sys, json
 
 from mappings.data_retrieval import repository as retrieval_options
 from mappings.features import repository as feature_options
@@ -10,9 +9,6 @@ from mappings.segmentation import repository as segmentation_options
 
 from components.segmentation.generate_labels import generate_segment_labels
 
-# HIDE TRACEBACK ERRORS TEMPORARILY
-sys.tracebacklimit = 0
-
 ##############################################################################################################
 ##############################################################################################################
 
@@ -20,6 +16,11 @@ def run():
     try:
         raw_config: dict = misc.load_yaml('pipeline.yaml')
         config = types.config_schema(**raw_config)
+
+        # HIDE ERROR TRACES WHEN REQUESTED
+        if config.experiment.hide_traces:
+            import sys
+            sys.tracebacklimit = 0
 
         pipeline_components = []
 
@@ -65,10 +66,6 @@ def run():
         feature_instance = feature_options.create('extract_columns', { 'columns': config.training.feature_columns })
         pipeline_components.append(('hidden_feature_extraction', feature_instance))
 
-        # HIDDEN -- CONVERT DATAFRAME TO FLAOT MATRIX
-        feature_instance = feature_options.create('to_float_matrix')
-        pipeline_components.append(('hidden_to_matrix', feature_instance))
-
     ########################################################################################
     ### ADD SCALER & MODEL
 
@@ -88,21 +85,27 @@ def run():
     ### EVALUATE PIPELINE
 
         misc.pprint({
+
+            # LIST SEGMENT LENGTHS
             'segment_lengths': {
                 'train': len(dataset['train']),
                 'test': len(dataset['test']),
                 'validate': len(dataset['validate']),
+                'total': len(dataset['train']) + len(dataset['test']) + len(dataset['validate'])
             },
+
+            # COMPUTE SEGMENT SCORES
             'model_scores': {
                 'train': pipeline.score(dataset['train'], labels['train']),
                 'test': pipeline.score(dataset['test'], labels['test']),
                 'validate': pipeline.score(dataset['validate'], labels['validate']),
             },
-        })
 
-        print('\nSKLEARN PIPELINE STEPS:')
-        for step in pipeline.steps:
-            print(f'   {step[1]}')
+            # STRINGIFIED REPRESENTATION OF PIPELINE
+            'sklearn_pipeline': [
+                str(item[1]) for item in pipeline.steps
+            ]
+        })
 
     # OTHERWISE, AT LEAST ONE TEST FAILED
     # THEREFORE, BLOCK THE EXPERIMENT
@@ -111,12 +114,6 @@ def run():
         print('----------------------------------------------------------------------')
         print(error)
         return False
-    
-    # except Exception as error:
-    #     print(f'\nINTERPRETER-SIDE FATAL ERROR:')
-    #     print('----------------------------------------------------------------------')
-    #     print(error)
-    #     return False
 
 if __name__ == '__main__':
     run()

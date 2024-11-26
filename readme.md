@@ -60,24 +60,35 @@ OK
 make run
 
 # EXAMPLE OUTPUT
---------
-DATASET LEN:        8605
-TRAIN SEGMENT:      6454
-TEST SEGMENT:       1291
-VALIDATE SEGMENT:   860
---------
-TRAIN SCORE:        0.9836
-TEST SCORE:         0.7872
-VALIDATE SCORE:     0.8906
---------
-Pipeline(steps=[
-    ('hidden_to_df', to_dataframe()),
-    ('0_stochastic_k', stochastic_k(window_size=5)),
-    ('1_shift_column', shift_column(column=close, shift_by=14)),
-    ('hidden_drop_nans', drop_nan_rows()),
-    ('hidden_feature_extraction', extract_columns(columns=['close', 'volume', 'sk5'])),
-    ('hidden_to_matrix', to_float_matrix()),
-    ('scaler', StandardScaler()),
-    ('model', LinearRegression())
-])
+{
+    "segment_lengths": {
+        "train": 6454,
+        "test": 1291,
+        "validate": 860
+    },
+    "model_scores": {
+        "train": {
+            "r2": 0.6086,
+            "mse": 0.0
+        },
+        "test": {
+            "r2": -7.3868,
+            "mse": 0.0
+        },
+        "validate": {
+            "r2": -66.617,
+            "mse": 0.0001
+        }
+    },
+    "sklearn_pipeline": [
+        "to_dataframe()",
+        "stochastic_k(window_size=5)",
+        "shift_column(column=close, shift_by=14)",
+        "drop_nan_rows()",
+        "extract_columns(columns=['open', 'close', 'high', 'low', 'volume', 'sk5'])",
+        "to_float_matrix()",
+        "StandardScaler()",
+        "xg_boost_regression(n_estimators=5, max_depth=2, learning_rate=0.1, subsample=0.8)"
+    ]
+}
 ```

@@ -8,10 +8,6 @@ from mappings.models import repository as model_options
 from mappings.scalers import repository as scaler_options
 from mappings.segmentation import repository as segmentation_options
 
-# HIDE TRACEBACK ERRORS TEMPORARILY
-import sys
-sys.tracebacklimit = 0
-
 ##############################################################################################################
 ##############################################################################################################
 
@@ -23,6 +19,10 @@ def run():
 
         raw_config: dict = misc.load_yaml('pipeline.yaml')
         config = types.config_schema(**raw_config)
+
+        if config.experiment.hide_traces:
+            import sys
+            sys.tracebacklimit = 0
 
     #####################################################################################
     ### UNITTEST DATASET RETRIEVAL
@@ -60,11 +60,6 @@ def run():
         # HIDDEN FEATURE -- EXTRACT FEATURE COLUMNS
         feature_module = feature_options.get_tests('extract_columns')
         run_tests(feature_module, { 'columns': config.training.feature_columns })
-
-        # HIDDEN FEATURE -- CONVERT FROM DATAFRAME TO FLOAT MATRIX
-        # SINCE THE SCALER (NEXT STEP) DOES NOT UNDERSTAND WHAT A DATAFRAME IS
-        feature_module = feature_options.get_tests('to_float_matrix')
-        run_tests(feature_module, {})
 
     #####################################################################################
     ### UNITTEST DATASET SEGMENTATION
@@ -114,12 +109,6 @@ def run():
     # THEREFORE, BLOCK THE EXPERIMENT
     except AssertionError as error:
         print(f'\nINTERPRETER-SIDE ASSERTION ERROR:')
-        print('----------------------------------------------------------------------')
-        print(error)
-        return False
-    
-    except Exception as error:
-        print(f'\nINTERPRETER-SIDE FATAL ERROR:')
         print('----------------------------------------------------------------------')
         print(error)
         return False

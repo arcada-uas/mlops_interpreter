@@ -23,7 +23,11 @@ class training_schema(BaseModel):
     scaler: name_params_pair
     model: name_params_pair
 
+class experiment_schema(BaseModel):
+    hide_traces: bool
+
 class config_schema(BaseModel):
+    experiment: experiment_schema
     dataset: dataset_schema
     features: list[name_params_pair]
     training: training_schema
