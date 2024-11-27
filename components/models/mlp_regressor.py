@@ -1,11 +1,9 @@
 import numpy as np
-
-from pydantic import BaseModel, Field, ValidationError
+from pydantic import BaseModel, Field
 from sklearn.datasets import make_regression
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 from sklearn.model_selection import train_test_split
 from sklearn.neural_network import MLPRegressor
-
 from components.models.base_model import base_model
 from common.testing import base_unittest
 
@@ -56,9 +54,8 @@ class custom_model(base_model):
         assert features is not None and labels is not None, "Features and labels cannot be None."
         assert len(features) > 0, "Features cannot be empty."
         assert len(features) == len(labels), "Features and labels must have the same length."
+        assert self.model is None, 'Model has already been trained.'
 
-        if self.model is not None:
-            raise RuntimeError("Model has already been trained.")
         self.model = MLPRegressor(
             hidden_layer_sizes=self.hidden_layer_sizes,
             activation=self.activation,
