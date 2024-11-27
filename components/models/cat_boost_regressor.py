@@ -20,6 +20,7 @@ class InputSchema(BaseModel):
 
 class custom_model(base_model):
     def __init__(self, input_params: dict):
+        assert isinstance(input_params, dict), f"ARG 'input_params' MUST BE OF TYPE DICT, GOT {type(input_params)}"
         params = InputSchema(**input_params)
 
         self.iterations = params.iterations

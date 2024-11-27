@@ -88,21 +88,28 @@ training:
         #     max_depth: 2
         #     learning_rate: 0.1
         #     subsample: 0.8
-        # name: svr
-        # params:
-        #     C: 1.0
-        #     epsilon: 0.1
-        #     kernel: rbf
-        #     n_splits: 3
-        name: cat_boost_regressor
+        name: svr_regressor
         params:
-            iterations: 100
-            learning_rate: 0.1
-            depth: 6
-            l2_leaf_reg: 3.0
-            loss_function: RMSE
-            random_seed: 42
-            verbose: 0
+            C: 1.0
+            epsilon: 0.1
+            kernel: rbf
+            degree: 3
+            gamma: scale
+            coef0: 0.0
+            shrinking: true
+            tol: 0.001
+            max_iter: -1
+            n_splits: 3
+
+        # name: cat_boost_regressor
+        # params:
+        #     iterations: 100
+        #     learning_rate: 0.1
+        #     depth: 6
+        #     l2_leaf_reg: 3.0
+        #     loss_function: RMSE
+        #     random_seed: 42
+        #     verbose: 0
 
         # name: mlp_regressor
         # params:
