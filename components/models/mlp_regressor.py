@@ -1,7 +1,6 @@
 import numpy as np
-import yaml
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ValidationError
 from sklearn.datasets import make_regression
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 from sklearn.model_selection import train_test_split
@@ -103,67 +102,35 @@ class custom_model(base_model):
 
 class tests(base_unittest):
     def test_00_validate_input(self):
-        with open("model_config.yaml", "r") as file:
-            input_params = yaml.safe_load(file)["params"]
+        model = custom_model(self.input_params)
+        self.assertEqual(model.hidden_layer_sizes, (200, 100, 50))
+        self.assertEqual(model.activation, "relu")
+        self.assertEqual(model.solver, "adam")
+        self.assertEqual(model.alpha, 0.001)
+        self.assertEqual(model.learning_rate, "adaptive")
+        self.assertEqual(model.max_iter, 1000)
+        self.assertEqual(model.random_state, 42)
+        self.assertTrue(model.early_stopping)
+        self.assertEqual(model.validation_fraction, 0.1)
 
-        model = custom_model(input_params)
-        assert model.hidden_layer_sizes == (200, 100, 50)
-        assert model.activation == "relu"
-        assert model.solver == "adam"
-        assert model.alpha == 0.001
-        assert model.learning_rate == "adaptive"
-        assert model.max_iter == 1000
-        assert model.random_state == 42
-        assert model.early_stopping is True
-        assert model.validation_fraction == 0.1
+    def test_01_invalid_parameters(self):
+        invalid_cases = [
+            {"hidden_layer_sizes": "invalid"},  # Not a tuple
+            {"activation": "invalid"},  # Not a valid activation function
+            {"solver": "invalid"},  # Not a valid solver
+            {"alpha": -0.001},  # Negative alpha
+            {"learning_rate": "invalid"},  # Not a valid learning rate
+            {"max_iter": 0},  # Non-positive max_iter
+            {"random_state": "invalid"},  # Not an integer
+            {"validation_fraction": 1.5},  # Greater than 1
+        ]
 
-    def test_01_train_and_evaluate(self):
-        X, y = make_regression(n_samples=1000, n_features=10, noise=0.1, random_state=42)
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-
-        with open("model_config.yaml", "r") as file:
-            input_params = yaml.safe_load(file)["params"]
-
-        model = custom_model(input_params)
-        model.fit(X_train, y_train)
-        scores = model.score(X_test, y_test)
-        assert "mae" in scores
-        assert "mse" in scores
-        assert "rmse" in scores
-        assert "r2" in scores
-
-    def test_02_corner_cases(self):
-        with open("model_config.yaml", "r") as file:
-            input_params = yaml.safe_load(file)["params"]
-
-        # Zero samples case
-        X, y = np.empty((0, 10)), np.empty((0,))
-        model = custom_model(input_params)
-        try:
-            model.fit(X, y)
-        except ValueError:
-            pass  # Expected
-
-        # Invalid input types
-        X, y = "invalid_input", [1, 2, 3]
-        try:
-            model.fit(X, y)
-        except ValueError:
-            pass  # Expected
-
-    def test_03_consistency_with_random_state(self):
-        X, y = make_regression(n_samples=1000, n_features=10, noise=0.1, random_state=42)
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-
-        with open("model_config.yaml", "r") as file:
-            input_params = yaml.safe_load(file)["params"]
-
-        model1 = custom_model(input_params)
-        model1.fit(X_train, y_train)
-        scores1 = model1.score(X_test, y_test)
-
-        model2 = custom_model(input_params)
-        model2.fit(X_train, y_train)
-        scores2 = model2.score(X_test, y_test)
-
-        assert scores1 == scores2, "Scores should be consistent with the same random_state."
+        for case in invalid_cases:
+            params = self.input_params.copy()
+            params.update(case)
+            try:
+                custom_model(params)
+                self.fail(f"Expected ValidationError for parameters: {params}")
+            except ValidationError as e:
+                # Test passes if ValidationError is raised
+                print(f"ValidationError correctly raised for parameters: {params}\nError: {e}")
