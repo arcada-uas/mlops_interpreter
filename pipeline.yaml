@@ -71,7 +71,7 @@ training:
 
     # WHAT MODEL SHOULD WE USE?
     model:
-        # name: xg_boost_regression
+        # name: xgboost_regressor
         # params:
         #     n_estimators: 5
         #     max_depth: 2
@@ -82,26 +82,33 @@ training:
         #         max: 1e2
         # name: linear_regression
         # params: {}
-        # name: xg_boost
-        # params:
-        #     n_estimators: 5
-        #     max_depth: 2
-        #     learning_rate: 0.1
-        #     subsample: 0.8
-        name: svr_regressor
+        name: xgboost_regressor
         params:
-            C: 1.0
-            epsilon: 0.1
-            kernel: rbf
-            degree: 3
-            gamma: scale
-            coef0: 0.0
-            shrinking: true
-            tol: 0.001
-            max_iter: -1
-            n_splits: 3
+            n_estimators: 5
+            max_depth: 2
+            learning_rate: 0.1
+            subsample: 0.8
+            colsample_bytree: 1.0
+            gamma: 0.0
+            reg_alpha: 0.0
+            reg_lambda: 1.0
+            n_jobs: -1
+            random_state: 42
+        
+        # name: svr_regressor
+        # params:
+        #     C: 1.0
+        #     epsilon: 0.1
+        #     kernel: rbf
+        #     degree: 3
+        #     gamma: scale
+        #     coef0: 0.0
+        #     shrinking: true
+        #     tol: 0.001
+        #     max_iter: -1
+        #     n_splits: 3
 
-        # name: cat_boost_regressor
+        # name: catboost_regressor
         # params:
         #     iterations: 100
         #     learning_rate: 0.1
