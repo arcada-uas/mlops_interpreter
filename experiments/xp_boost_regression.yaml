@@ -1,9 +1,3 @@
-experiment:
-    hide_traces: False
-
-#######################################################################################
-#######################################################################################
-
 dataset:
     method: from_cassandra
     params:
@@ -72,73 +66,21 @@ training:
 
     # WHAT SCALAR SHOULD WE USE?
     scaler:
-        name: scaler_pipeline
-        params:
-            matrix_conversion: True
-            use_std: True
-            use_mean: True
+        name: standard_scaler
+        params: {}
 
     # WHAT MODEL SHOULD WE USE?
     model:
-        # name: xgboost_regressor
-        # params:
-        #     n_estimators: 5
-        #     max_depth: 2
-        #     learning_rate: 0.1
-        #     subsample: 0.8
-        #     cross_validation:
-        #         min: 1e-3
-        #         max: 1e2
-        # name: linear_regression
-        # params: {}
-
-        name: xgboost_regressor
+        name: xg_boost_regression
         params:
             n_estimators: 5
             max_depth: 2
             learning_rate: 0.1
             subsample: 0.8
-            colsample_bytree: 1.0
-            gamma: 0.0
-            reg_alpha: 0.0
-            reg_lambda: 1.0
-            n_jobs: -1
-            random_state: 42
-        
-        # name: svr_regressor
-        # params:
-        #     C: 1.0
-        #     epsilon: 0.1
-        #     kernel: rbf
-        #     degree: 3
-        #     gamma: scale
-        #     coef0: 0.0
-        #     shrinking: true
-        #     tol: 0.001
-        #     max_iter: -1
-        #     n_splits: 3
+            cross_validation:
+                min: 1e-3
+                max: 1e2
 
-        # name: catboost_regressor
-        # params:
-        #     iterations: 100
-        #     learning_rate: 0.1
-        #     depth: 6
-        #     l2_leaf_reg: 3.0
-        #     loss_function: RMSE
-        #     random_seed: 42
-        #     verbose: 0
-
-        # name: mlp_regressor
-        # params:
-        #     hidden_layer_sizes: [200, 100, 50]
-        #     activation: relu
-        #     solver: adam
-        #     alpha: 0.001
-        #     learning_rate: adaptive
-        #     max_iter: 1000
-        #     random_state: 42
-        #     early_stopping: true
-        #     validation_fraction: 0.1
     # model:
     #     name: linear_regression
     #     params: {}

@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field
 from components.models.base_model import base_model
-from common.testing import base_unittest
+from common.testing import base_unittest, validate_params
 from sklearn.metrics import r2_score, mean_squared_error
 from xgboost import XGBRegressor
 
@@ -20,10 +20,7 @@ class input_schema(BaseModel):
 
 class custom_model(base_model):
     def __init__(self, input_params: dict):
-
-        # VALIDATE INPUT PARAMS
-        assert isinstance(input_params, dict), f"ARG 'input_params' MUST BE OF TYPE DICT, GOT {type(input_params)}"
-        params = input_schema(**input_params)
+        params = validate_params(input_params, input_schema)
 
         # SAVE PARAMS IN STATE
         self.n_estimators = params.n_estimators
@@ -38,13 +35,7 @@ class custom_model(base_model):
         self.model = None
 
     def __repr__(self):
-        return f"""xg_boost_regression(
-            n_estimators={self.n_estimators}
-            max_depth={self.max_depth}
-            learning_rate={self.learning_rate}
-            subsample={self.subsample}
-        )"""
-
+        return f"xg_boost_regression(n_estimators={self.n_estimators}, max_depth={self.max_depth}, learning_rate={self.learning_rate}, subsample={self.subsample})"
 
     def fit(self, features: list[list[float]], labels: list[float] = None):
         assert self.model == None, 'A MODEL HAS ALREADY BEEN TRAINED'
