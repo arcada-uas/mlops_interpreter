@@ -1,5 +1,6 @@
 from components.features.base_feature import base_feature
 from common.testing import base_unittest, validate_params
+from common.misc import stringified_params
 from pydantic import BaseModel
 from pandas import DataFrame
 
@@ -18,14 +19,7 @@ class custom_scaler(base_feature):
         self.scaler = None
 
     def __repr__(self):
-        return f"scaler(foo={self.foo})"
-
-    # SKLEARN REQUIRED METHOD -- FITS SCALER, THEN TRANSFORMS
-    def fit_transform(self, features: DataFrame, labels=None):
-        assert self.scaler == None, f"THE SCALER HAS ALREADY BEEN FIT"
-
-        self.fit(features)
-        return self.transform(features)
+        return f'my_scaler(foo={self.foo})'
 
     # FIT THE SCALER ON TRAINING DATA
     def fit(self, dataframe: DataFrame, labels=None):

@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field
 from components.features.base_feature import base_feature
-from common.testing import base_unittest
+from common.testing import base_unittest, validate_params
 from pandas import DataFrame
 import random, time
 
@@ -12,23 +12,21 @@ class input_schema(BaseModel):
 
 class custom_feature(base_feature):
     def __init__(self, input_params: dict):
-        assert isinstance(input_params, dict), f"ARG 'input_params' MUST BE OF TYPE DICT, GOT {type(input_params)}"
-        input_schema(**input_params)
-
-        self.target_columns = input_params['columns']
-
+        params = validate_params(input_params, input_schema)
+        self.columns = params.columns
+        
     def __repr__(self):
-        return f"extract_columns(columns={self.target_columns})"
+        return f'extract_columns(columns={self.columns})'
     
     def transform(self, dataframe: DataFrame):
         df_columns = list(dataframe.columns)
 
         # MAKE SURE ALL THE COLUMNS EXIST
-        for column_name in self.target_columns:
+        for column_name in self.columns:
             assert column_name in df_columns, f"COLUMN '{column_name}' MISSING FROM DATASET"
 
         # EXTRACT JUST THE VALUES OF THE FEATURE COLUMNS
-        return dataframe[self.target_columns]
+        return dataframe[self.columns]
 
 ##############################################################################################################
 ##############################################################################################################

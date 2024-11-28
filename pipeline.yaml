@@ -72,12 +72,27 @@ training:
 
     # WHAT SCALAR SHOULD WE USE?
     scaler:
-        name: scaler_pipeline
+        name: standard_scaler
         params:
             matrix_conversion: True
             use_std: True
             use_mean: True
 
+    # WHAT MODEL SHOULD WE USE?
     model:
         name: linear_regression
-        params: {}
+        params:
+            fit_intercept: True
+
+    # model:
+    #     name: xg_boost_regression
+    #     params:
+    #         n_estimators: 5
+    #         max_depth: 2
+    #         learning_rate: 0.1
+    #         subsample: 0.8
+
+    # MODEL EVALUATION METRICS
+    metrics:
+        - root_squared
+        - mean_squared

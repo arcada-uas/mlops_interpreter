@@ -9,5 +9,5 @@ repository = create_repository({
     'xg_boost_regression': option(
         xg_boost_regression.custom_model,
         xg_boost_regression.tests
-    )
+    ),
 }, label='model')

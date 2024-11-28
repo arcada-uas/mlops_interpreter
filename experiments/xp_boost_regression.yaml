@@ -77,9 +77,6 @@ training:
             max_depth: 2
             learning_rate: 0.1
             subsample: 0.8
-            cross_validation:
-                min: 1e-3
-                max: 1e2
 
     # model:
     #     name: linear_regression

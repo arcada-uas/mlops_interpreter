@@ -4,7 +4,8 @@ from pandas import DataFrame
 import random, time
 
 class custom_feature(base_feature):
-    def __repr__(self): return "to_dataframe()"
+    def __repr__(self):
+        return f'to_dataframe()'
 
     def transform(self, dataset: list[dict]):
         return DataFrame(dataset)

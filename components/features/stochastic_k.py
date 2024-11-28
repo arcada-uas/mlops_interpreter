@@ -1,5 +1,5 @@
 from components.features.base_feature import base_feature
-from common.testing import base_unittest
+from common.testing import base_unittest, validate_params
 from pandas import DataFrame
 import random, time, numpy as np
 from pydantic import BaseModel, Field
@@ -16,14 +16,12 @@ class input_schema(BaseModel):
 
 class custom_feature(base_feature):
     def __init__(self, input_params: dict):
-        assert isinstance(input_params, dict), f"ARG 'input_params' MUST BE OF TYPE DICT, GOT {type(input_params)}"
-        input_schema(**input_params)
-
-        self.window_size = input_params['window_size']
-        self.output_column = input_params['output_column']
+        params = validate_params(input_params, input_schema)
+        self.window_size = params.window_size
+        self.output_column = params.output_column
 
     def __repr__(self):
-        return f"stochastic_k(window_size={self.window_size})"
+        return f'stochastic_k(window_size={self.window_size})'
 
     def transform(self, dataframe: DataFrame):
 
