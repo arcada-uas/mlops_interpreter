@@ -9,3 +9,4 @@ assertpy
 scikit-learn
 xgboost
 catboost
+darts

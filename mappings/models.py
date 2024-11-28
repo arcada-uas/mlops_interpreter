@@ -1,5 +1,5 @@
 from common.misc import create_repository, option
-from components.models import catboost_regressor, linear_regression, svr_regressor, mlp_regressor, xgboost_regressor
+from components.models import catboost_regressor, linear_regression, svr_regressor, mlp_regressor, xgboost_regressor, nlinear_regressor
 
 repository = create_repository({
     'linear_regression': option(
@@ -21,5 +21,9 @@ repository = create_repository({
     'mlp_regressor': option(
         mlp_regressor.custom_model,
         mlp_regressor.tests
+    ),
+    'nlinear_regressor': option(
+        nlinear_regressor.custom_model,
+        nlinear_regressor.tests
     )
 }, label='model')

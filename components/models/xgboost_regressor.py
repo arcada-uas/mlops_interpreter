@@ -133,7 +133,11 @@ class tests(base_unittest):
         self.assertEqual(model.n_jobs, -1, "Mismatch in n_jobs.")
         self.assertEqual(model.random_state, 42, "Mismatch in random_state.")
 
-    def test_01_train_and_evaluate(self):
+    def test_01_runs_with_yaml_params(self):
+        """Test model instantiation with dynamically loaded YAML parameters."""
+        custom_model(self.input_params)
+        
+    def test_012_train_and_evaluate(self):
         """Test to train and evaluate the custom_model."""
         X, y = make_regression(n_samples=1000, n_features=10, noise=0.1, random_state=42)
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
