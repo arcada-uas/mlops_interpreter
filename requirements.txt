@@ -1,10 +1,11 @@
-scikit-learn
 pandas
 pyyaml
 cassandra-driver
 numpy
 pydantic
-assertpy
-xgboost
+
 black
+assertpy
+scikit-learn
+xgboost
 catboost

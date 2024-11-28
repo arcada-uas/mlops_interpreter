@@ -72,12 +72,13 @@ training:
 
     # WHAT SCALAR SHOULD WE USE?
     scaler:
-        name: scaler_pipeline
+        name: standard_scaler
         params:
             matrix_conversion: True
             use_std: True
             use_mean: True
 
+    # WHAT MODEL SHOULD WE USE?
     # WHAT MODEL SHOULD WE USE?
     model:
         # name: xgboost_regressor

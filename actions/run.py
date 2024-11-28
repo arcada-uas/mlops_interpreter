@@ -73,6 +73,7 @@ def run():
         pipeline_components.append(('scaler', scaler_instance))
 
         model_instance = model_options.create(config.training.model.name, config.training.model.params)
+        model_instance.set_metrics(config.training.metrics)
         pipeline_components.append(('model', model_instance))
 
     ########################################################################################
@@ -84,28 +85,31 @@ def run():
     ########################################################################################
     ### EVALUATE PIPELINE
 
-        misc.pprint({
+        overview = {
+            'segment_lengths': {},
+            'temp_metrics': {},
+            'segment_metrics': {},
+            'sklearn_pipeline': [str(item[1]) for item in pipeline.steps]
+        }
 
-            # LIST SEGMENT LENGTHS
-            'segment_lengths': {
-                'train': len(dataset['train']),
-                'test': len(dataset['test']),
-                'validate': len(dataset['validate']),
-                'total': len(dataset['train']) + len(dataset['test']) + len(dataset['validate'])
-            },
+        for segment_name, segment_dataset in dataset.items():
+            overview['segment_lengths'][segment_name] = len(segment_dataset)
+            overview['temp_metrics'][segment_name] = pipeline.score(segment_dataset, labels[segment_name])
 
-            # COMPUTE SEGMENT SCORES
-            'model_scores': {
-                'train': pipeline.score(dataset['train'], labels['train']),
-                'test': pipeline.score(dataset['test'], labels['test']),
-                'validate': pipeline.score(dataset['validate'], labels['validate']),
-            },
+        # COMPUTE TOTAL LENGTH OF DATASET
+        overview['segment_lengths']['total'] = sum(overview['segment_lengths'].values())
 
-            # STRINGIFIED REPRESENTATION OF PIPELINE
-            'sklearn_pipeline': [
-                str(item[1]) for item in pipeline.steps
-            ]
-        })
+        # TRANSPOSE METRICS FOR READABILITY
+        for metric_name in config.training.metrics:
+            container = {}
+
+            for segment_name, segment_metrics in overview['temp_metrics'].items():
+                container[segment_name] = segment_metrics[metric_name]
+            overview['segment_metrics'][metric_name] = container
+
+        del overview['temp_metrics']
+
+        misc.pprint(overview)
 
     # OTHERWISE, AT LEAST ONE TEST FAILED
     # THEREFORE, BLOCK THE EXPERIMENT

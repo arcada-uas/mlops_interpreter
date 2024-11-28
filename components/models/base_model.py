@@ -1,15 +1,40 @@
 from abc import ABC, abstractmethod
-
+from mappings.metrics import repository as metric_options
 
 class base_model(ABC):
+    def __init__(self, input_params: dict):
+        self.model = None
+        self.metrics = []
+
+    def __repr__(self):
+        raise NotImplementedError()
+
     @abstractmethod
     def fit(self, features, labels=None):
-        pass
-
+        raise NotImplementedError()
+    
     @abstractmethod
     def predict(self, features):
-        pass
+        raise NotImplementedError()
 
+    # INVOKED BY INTERPRETER DURING RUN SCRIPT
+    def set_metrics(self, metrics: list[str]):
+        self.metrics = metrics
+
+    # UNIFIED SCORE FUNCTION FOR ALL MODELS
+    # DO NOT OVERWRITE THIS
     @abstractmethod
     def score(self, features, labels):
-        pass
+        assert self.model != None, 'A MODEL HAS NOT BEEN TRAINED YET'
+        assert len(self.metrics) > 0, 'NO MODEL METRICS SPECIFIED'
+
+        # GENERATE PREDICTIONS WITH MODEL
+        predictions = self.predict(features)
+        container = {}
+
+        for metric_name in self.metrics:
+            metric_func = metric_options.get(metric_name)
+            rounded_value = round(metric_func(labels, predictions), 4)
+            container[metric_name] = rounded_value
+
+        return container

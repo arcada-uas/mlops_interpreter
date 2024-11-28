@@ -15,7 +15,7 @@ class custom_feature(base_feature):
         self.foo = params.foo
 
     def __repr__(self):
-        return f"my_feature(foo={self.foo})"
+        return f'my_feature(foo={self.foo})'
 
     def transform(self, dataframe: DataFrame):
         return dataframe

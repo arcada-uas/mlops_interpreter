@@ -5,7 +5,8 @@ from random import randrange
 from numpy import nan
 
 class custom_feature(base_feature):
-    def __repr__(self): return "drop_nan_rows()"
+    def __repr__(self):
+        return f'drop_nan_rows()'
 
     def transform(self, dataframe: DataFrame):
         assert isinstance(dataframe, DataFrame), f"ARG 'dataframe' MUST BE A PANDAS DATAFRAME, GOT {type(dataframe)}"

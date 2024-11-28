@@ -1,21 +1,33 @@
-UNITTEST LABEL GENERATION
-ADD DESCRIPTIONS TO EACH FEATURE/MODEL
-f```
-    name: xg_boost_regression
-    params:
-        n_estimators: 5
-        max_depth: 2
-        learning_rate: 0.1
-        subsample: 0.8
+TODO
+    UNITTEST LABEL GENERATION
+    WRITE FROM_CSV RETRIEVAL METHOD
+    WRITE A SYNTH DATASET FUNCTION THAT USES make_regression
+    IMPLEMENT THE OTHER METRICS -- CONSIDER UNITTEST FORMAT
 
-```
+    ADD DESCRIPTIONS TO EACH FEATURE/MODEL
+    f```
+        name: xg_boost_regression
+        params:
+            n_estimators: 5
+            max_depth: 2
+            learning_rate: 0.1
+            subsample: 0.8
+    ```
 
-MAKE UNIFIED TEST + RUN FILE
-INTEGRATE MLFLOW
+    MAKE UNIFIED TEST + RUN FILE
+    INTEGRATE MLFLOW
 
-ADD TYPE CONVERSION METHOD TO MODEL CLASS
-EXPAND ON EXPERIMENT DEBUG PARAMS
+----------------------------------------------------------------------------
 
-EXPAND LINEAR REGRESSION CLASS
+BUG FIXES
+    INVESTIGATE AND FIX ERROR RESULTING FROM
+        sequence_ratio:
+            - train: 0.75
+            - test: 0.25
+            - validate: 0
 
-WRITE FROM_CSV RETRIEVAL METHOD
+----------------------------------------------------------------------------
+
+YAML PARAM:
+    ADD OPTION TO SETUP GPU ENV?
+    LIMIT NUM OF TRACEBACKS INSTEAD OF TURNING IT OFF?
