@@ -1,6 +1,6 @@
 from common.misc import create_repository, option
-from components.features import shift_column, stochastic_k
-from components.features import to_dataframe, drop_nan_rows, extract_columns
+from components.features.standard import shift_column, stochastic_k
+from components.features.hidden import drop_nan_rows, extract_columns, to_dataframe
 
 repository = create_repository({
 

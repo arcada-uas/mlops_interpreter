@@ -1,17 +1,28 @@
 from datetime import datetime
-import yaml, json
+import json
+
+################################################################################################
+################################################################################################
 
 def unix_ts(date_string: str) -> int:
     date_format = '%Y-%m-%d %H:%M:%S'
     datetime_obj = datetime.strptime(date_string, date_format)
     return int(datetime_obj.timestamp())
 
-def load_yaml(file_path):
-    with open(file_path, 'r') as file:
-        return yaml.safe_load(file)
-
 def pprint(data_dict: dict):
     print(json.dumps(data_dict, indent=4))
+
+def formatted_print(items):
+    max_left_width = 35
+    left, right = items
+
+    left_str = str(left)
+    right_str = str(right)
+    spaces = " " * (max_left_width - len(left_str))
+    print(f"{left_str}:{spaces}{right_str}")
+
+################################################################################################
+################################################################################################
 
 class create_repository:
     def __init__(self, options_mapping: dict, label: str):
@@ -49,3 +60,6 @@ class option:
     def __init__(self, module, tests):
         self.module = module
         self.tests = tests
+
+################################################################################################
+################################################################################################

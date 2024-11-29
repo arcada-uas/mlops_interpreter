@@ -1,13 +1,19 @@
 from common.misc import create_repository, option
-from components.models import linear_regression, xg_boost_regression
+from components.models.regression import sklearn_linear, xg_boost
 
 repository = create_repository({
-    'linear_regression': option(
-        linear_regression.custom_model,
-        linear_regression.tests
+
+    # REGRESSION MODELS
+    'regression.sklearn_linear': option(
+        sklearn_linear.custom_model,
+        sklearn_linear.tests
     ),
-    'xg_boost_regression': option(
-        xg_boost_regression.custom_model,
-        xg_boost_regression.tests
+    'regression.xg_boost': option(
+        xg_boost.custom_model,
+        xg_boost.tests
     ),
+
+    # CLASSIFICATION MODELS
+    # ...
+
 }, label='model')

@@ -30,6 +30,8 @@ class base_model:
 
         for metric_name in self.metrics:
             metric_func = metric_options.get(metric_name)
+
+            # ROUND VALUE TO 4TH DECIMAL FOR READABILITY
             rounded_value = round(metric_func(labels, predictions), 4)
             container[metric_name] = rounded_value
 

@@ -4,6 +4,27 @@ from common.testing import base_unittest
 from assertpy import assert_that
 import random
 
+# dataset:
+#     method: from_cassandra
+#     params:
+#         db_table: shohel.refined_stock_data
+#         stock_symbol: AAPL
+
+#         # FORMAT: %Y-%m-%d %H:%M:%S
+#         timestamps:
+#             start: '2019-01-01 00:00:00'
+#             end: '2019-01-10 00:00:00'
+
+#     # EXPECTED ROW SCHEMA
+#     expected_schema:
+#         symbol: str
+#         timestamp: str
+#         open: float
+#         close: float
+#         high: float
+#         low: float
+#         volume: int
+
 class timestamp_schema(BaseModel):
     start: str
     end: str

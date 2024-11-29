@@ -2,8 +2,13 @@ import math
 from common.testing import base_unittest
 from pydantic import BaseModel, Field
 
-##############################################################################################################
-##############################################################################################################
+# segmentation:
+#     method: standard_ttv
+#     params:
+#         sequence_ratio:
+#             - train: 0.75
+#             - test: 0.15
+#             - validate: 0.1
 
 class input_schema(BaseModel):
     sequence_ratio: list[dict[str, float]] = Field(min_length=3, max_length=3)

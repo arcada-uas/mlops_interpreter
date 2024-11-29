@@ -4,6 +4,13 @@ from sklearn.preprocessing import StandardScaler
 from pydantic import BaseModel
 from pandas import DataFrame
 
+# scaler:
+#     name: standard_scaler
+#     params:
+#         matrix_conversion: True
+#         use_std: True
+#         use_mean: True
+
 class input_schema(BaseModel):
     use_std: bool
     use_mean: bool

@@ -2,10 +2,13 @@ install:
 	pip install -r requirements.txt
 
 test:
-	clear && python3 -m actions.test
+	clear && python3 -m actions.test_pipeline
 
-run:
-	clear && python3 -m actions.run
+create:
+	clear && python3 -m actions.create_pipeline
+
+train:
+	clear && python3 -m actions.train_pipeline
 
 push:
 	@echo "Commit message?"; \

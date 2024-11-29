@@ -1,21 +1,10 @@
 TODO
-    UNITTEST LABEL GENERATION
-    WRITE FROM_CSV RETRIEVAL METHOD
-    WRITE A SYNTH DATASET FUNCTION THAT USES make_regression
-    IMPLEMENT THE OTHER METRICS -- CONSIDER UNITTEST FORMAT
+    UPDATE UNITTESTS TO USE UNIFIED SYNTH DATASET FUNC
 
-    ADD DESCRIPTIONS TO EACH FEATURE/MODEL
-    f```
-        name: xg_boost_regression
-        params:
-            n_estimators: 5
-            max_depth: 2
-            learning_rate: 0.1
-            subsample: 0.8
-    ```
-
-    MAKE UNIFIED TEST + RUN FILE
     INTEGRATE MLFLOW
+    INTEGRATE RAY
+
+    UNITTEST LABEL GENERATION
 
 ----------------------------------------------------------------------------
 
@@ -26,8 +15,18 @@ BUG FIXES
             - test: 0.25
             - validate: 0
 
+    CREATE_PIPELINE RUNS
+        DOES NOT THROW ASSERT ERROR WITH CORRUPTED LABEL COLUMN
+
 ----------------------------------------------------------------------------
 
 YAML PARAM:
     ADD OPTION TO SETUP GPU ENV?
     LIMIT NUM OF TRACEBACKS INSTEAD OF TURNING IT OFF?
+
+----------------------------------------------------------------------------
+
+MAYBE LATER
+    DO METRICS NEED TO TESTED? HOW?
+    WRITE FROM_CSV RETRIEVAL METHOD
+    GENERATE PLOTS FOR RUN OVERVIEW

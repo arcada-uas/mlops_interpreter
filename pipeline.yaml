@@ -1,5 +1,8 @@
-experiment:
+debug:
     hide_traces: False
+    create_logfiles: True
+    limit_dataset: 250
+    test_verbosity: 2
 
 #######################################################################################
 #######################################################################################
@@ -80,19 +83,25 @@ training:
 
     # WHAT MODEL SHOULD WE USE?
     model:
-        name: linear_regression
+        type: regression
+        name: sklearn_linear
         params:
             fit_intercept: True
 
-    # model:
-    #     name: xg_boost_regression
-    #     params:
-    #         n_estimators: 5
-    #         max_depth: 2
-    #         learning_rate: 0.1
-    #         subsample: 0.8
-
     # MODEL EVALUATION METRICS
+    # AVAILABILITY IS BASED ON WHETHER THE MODEL TYPE
+    # WAS SET AS REGRESSION OR CLASSIFICATION
     metrics:
-        - root_squared
-        - mean_squared
+        - rse
+        - mse
+        - rmse
+        - mae
+        - mape
+        - smape
+        - mase
+
+#######################################################################################
+#######################################################################################
+
+# trading_strategy:
+    # ...

@@ -1,0 +1,54 @@
+{
+    "segment_lengths": {
+        "train": 6454,
+        "test": 1291,
+        "validate": 860,
+        "total": 8605
+    },
+    "segment_metrics": {
+        "regression.rse": {
+            "train": 0.9836,
+            "test": 0.7872,
+            "validate": 0.8906
+        },
+        "regression.mse": {
+            "train": 2.7508,
+            "test": 1.6362,
+            "validate": 1.9626
+        },
+        "regression.rmse": {
+            "train": 1.6586,
+            "test": 1.2791,
+            "validate": 1.4009
+        },
+        "regression.mae": {
+            "train": 3.5941,
+            "test": 2.8462,
+            "validate": 3.3539
+        },
+        "regression.mape": {
+            "train": 3.151,
+            "test": 2.4846,
+            "validate": 2.9062
+        },
+        "regression.smape": {
+            "train": 3.151,
+            "test": 2.4844,
+            "validate": 2.9063
+        },
+        "regression.mase": {
+            "train": 3.3133,
+            "test": 3.4909,
+            "validate": 3.3646
+        }
+    },
+    "sklearn_pipeline": [
+        "to_dataframe()",
+        "stochastic_k(window_size=5)",
+        "shift_column(target_column=close, shift_by=14)",
+        "drop_nan_rows()",
+        "extract_columns(columns=['open', 'close', 'high', 'low', 'volume', 'sk5'])",
+        "standard_scaler(std=True, mean=True, matrix_conversion=True)",
+        "linear_regression(fit_intercept=True)"
+    ]
+}

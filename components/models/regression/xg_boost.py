@@ -3,6 +3,15 @@ from components.models.base_model import base_model
 from common.testing import base_unittest, validate_params
 from xgboost import XGBRegressor
 
+# model:
+#     type: regression
+#     name: xg_boost
+#     params:
+#         n_estimators: 5
+#         max_depth: 2
+#         learning_rate: 0.1
+#         subsample: 0.8
+
 class input_schema(BaseModel):
     n_estimators: int = Field(ge=1)
     max_depth: int = Field(ge=1)
@@ -12,7 +21,7 @@ class input_schema(BaseModel):
 ##############################################################################################################
 ##############################################################################################################
 
-class custom_model(base_model):
+class custom_model(base_model):  
     def __init__(self, input_params: dict):
         params = validate_params(input_params, input_schema)
 
@@ -22,7 +31,7 @@ class custom_model(base_model):
         self.learning_rate = params.learning_rate
         self.subsample = params.subsample
 
-        # DEFAULT PARAMSx
+        # DEFAULT PARAMS
         self.model = None
 
     def __repr__(self):

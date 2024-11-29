@@ -1,7 +1,8 @@
-import unittest, inspect, os, json
 from abc import ABC
 from pandas import DataFrame
-# import coverage
+from sklearn.datasets import make_regression
+from pydantic import BaseModel, Field
+import unittest, os, json, time
 
 # THE ENVIRONMENT VAR THAT UNITTESTS REQUIRE TO OBTAIN DYNAMIC ARGUMENTS
 env_var_name: str = '_UNITTEST_ARGS'
@@ -55,7 +56,7 @@ class StopOnFirstErrorResult(unittest.TextTestResult):
         super().addFailure(test, err)
         self.stop()  # Stop further tests on failure
 
-def run_tests(module, input_params: dict):
+def run_tests(module, verbosity_level, input_params: dict):
 
     # HANDLE SAMPLE DATASET FORMATTING
     if '_sample_dataset' in input_params:
@@ -73,14 +74,15 @@ def run_tests(module, input_params: dict):
         raise Exception(f"MODULE '{module}' HAS NO UNITTESTS")
     
     # OTHERWISE, RUN THE TESTS
-    runner = unittest.TextTestRunner(verbosity=2, resultclass=StopOnFirstErrorResult)
+    runner = unittest.TextTestRunner(verbosity=verbosity_level, resultclass=StopOnFirstErrorResult)
     output = runner.run(suite)
 
     # KILL PARENT PROCESS IF YOU FIND ANY ERRORS/FAILS
     if len(output.errors) > 0 or len(output.failures) > 0:
         raise Exception(output)
 
-    return output
+    # OTHERWISE, RETURN THE NUMBER OF TESTS THAT WERE RAN 
+    return output.testsRun
 
 ################################################################################################
 ################################################################################################
@@ -138,3 +140,51 @@ def build_and_validate_schema(sample_row, expected_schema):
 def validate_params(input_dict, input_schema):
     assert isinstance(input_dict, dict), f"ARG 'input_params' MUST BE OF TYPE DICT, GOT {type(input_dict)}"
     return input_schema(**input_dict)
+
+################################################################################################
+################################################################################################
+
+def create_synth_dataset(input_params: dict):
+    """
+        column_names: list[str] = Field(min_length=1)
+        
+        num_rows: int = Field(ge=1)
+
+        random_state: int
+
+        to_df: bool = False
+    """
+
+    class create_synth_dataset_inputs(BaseModel):
+        column_names: list[str] = Field(min_length=1)
+        num_rows: int = Field(ge=1)
+        random_state: int
+        to_df: bool = False
+
+    # VALIDATE INPUTS
+    params = validate_params(input_params, create_synth_dataset_inputs)
+
+    # GENERATE A FEATURE MATRIX
+    all_features, _ = make_regression(
+        n_samples=params.num_rows,
+        n_features=len(params.column_names),
+        noise=10.0,
+        random_state=params.random_state
+    )
+
+    # GENERATE A STARTING UNIX TIMESTAMP
+    start_time = int(time.time())
+
+    # STITCH TOGETHER FEATURES & COLUMN NAMES
+    dataset = [{
+        'symbol': 'SYNTH',
+        'timestamp': start_time + nth,
+        **dict(zip(params.column_names, row_features)),
+    } for nth, row_features in enumerate(all_features)]
+
+    # WHEN REQUESTED, CONVERT O DATAFRAME
+    if params.to_df:
+        return DataFrame(dataset)
+
+    # OTHERWISE, RETURN AS LIST OF DICTS
+    return dataset

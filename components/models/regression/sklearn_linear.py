@@ -3,6 +3,12 @@ from components.models.base_model import base_model
 from common.testing import base_unittest, validate_params
 from sklearn.linear_model import LinearRegression
 
+# model:
+#     type: regression
+#     name: sklearn_linear
+#     params:
+#         fit_intercept: True
+
 class input_schema(BaseModel):
     fit_intercept: bool
 
@@ -10,7 +16,7 @@ class input_schema(BaseModel):
 ##############################################################################################################
 
 class custom_model(base_model):
-    def __init__(self, input_params: dict):
+    def __init__(self, input_params: dict):    
         params = validate_params(input_params, input_schema)
 
         # SAVE PARAMS IN STATE
