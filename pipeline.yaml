@@ -149,20 +149,17 @@ training:
         type: classification
         name: svc
         params:
-            C: 1.0
-            kernel: rbf
+            C: 0.1
+            kernel: linear
             probability: True
             random_state: 42
-            tol: 1e-3
-            shrinking: True
-            max_iter: -1
-        metrics:
-            - accuracy
-            - precision
-            - recall
-            - f1_score
-            # - roc_auc
-            # - specificity
+    metrics:
+        - accuracy
+        - precision
+        - recall
+        - f1_score
+        - roc_auc
+
 #######################################################################################
 #######################################################################################
 

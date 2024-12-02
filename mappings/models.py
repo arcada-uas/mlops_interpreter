@@ -25,6 +25,8 @@ repository = create_repository({
         cat_boost.custom_model,
         cat_boost.tests
     ),
+    
+    # CLASSIFICATION MODELS
     'classification.svc': option(
         svc.custom_model,
         svc.tests
@@ -33,7 +35,5 @@ repository = create_repository({
         xg_boost.custom_model,
         xg_boost.tests
     ),
-    # CLASSIFICATION MODELS
-    # ...
 
 }, label='model')
