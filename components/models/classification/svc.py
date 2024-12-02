@@ -48,26 +48,26 @@ class custom_model(base_model):
         # TRAIN IT
         self.model.fit(features, labels)
 
-    def predict(self, features: list[list[float]]) -> list[int]:
-        self.pre_prediction_asserts(features)
-        return self.model.predict(features)
+    # def predict(self, features: list[list[float]]) -> list[int]:
+    #     self.pre_prediction_asserts(features)
+    #     return self.model.predict(features)
 
-    def calculate_metrics(self, labels: list[int], predictions: list[int]) -> dict:
-        metrics = {
-            "accuracy": accuracy_score(labels, predictions),
-            "precision": precision_score(labels, predictions, average='weighted'),
-            "recall": recall_score(labels, predictions, average='weighted'),
-            "f1_score": f1_score(labels, predictions, average='weighted'),
-            "roc_auc": roc_auc_score(labels, predictions) if len(set(labels)) == 2 else None,
-            "specificity": self.calculate_specificity(labels, predictions)
-        }
-        return metrics
+    # def score(self, labels: list[int], predictions: list[int]) -> dict:
+    #     metrics = {
+    #         "accuracy": accuracy_score(labels, predictions),
+    #         "precision": precision_score(labels, predictions, average='weighted'),
+    #         "recall": recall_score(labels, predictions, average='weighted'),
+    #         "f1_score": f1_score(labels, predictions, average='weighted'),
+    #         "roc_auc": roc_auc_score(labels, predictions) if len(set(labels)) == 2 else None,
+    #         "specificity": self.calculate_specificity(labels, predictions)
+    #     }
+    #     return metrics
 
-    def calculate_specificity(self, labels: list[int], predictions: list[int]) -> float:
-        cm = confusion_matrix(labels, predictions)
-        tn = cm[0, 0]
-        fp = cm[0, 1]
-        return tn / (tn + fp) if (tn + fp) > 0 else None
+    # def calculate_specificity(self, labels: list[int], predictions: list[int]) -> float:
+    #     cm = confusion_matrix(labels, predictions)
+    #     tn = cm[0, 0]
+    #     fp = cm[0, 1]
+    #     return tn / (tn + fp) if (tn + fp) > 0 else None
 
 
 ##############################################################################################################
