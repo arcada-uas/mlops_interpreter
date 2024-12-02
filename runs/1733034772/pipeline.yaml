@@ -1,0 +1,65 @@
+debug:
+    create_local_files: true
+    limit_dataset: 250
+    test_verbosity: 2
+dataset:
+    method: from_cassandra
+    params:
+        db_table: shohel.refined_stock_data
+        stock_symbol: AAPL
+        timestamps:
+            start: '2019-01-01 00:00:00'
+            end: '2019-01-10 00:00:00'
+    expected_schema:
+        symbol: str
+        timestamp: str
+        open: float
+        close: float
+        high: float
+        low: float
+        volume: int
+features:
+-   name: stochastic_k
+    params:
+        window_size: 5
+        output_column: sk5
+-   name: shift_column
+    params:
+        target_column: close
+        shift_by: 14
+        output_column: shifted_close
+training:
+    feature_columns:
+    - open
+    - close
+    - high
+    - low
+    - volume
+    - sk5
+    label_column: shifted_close
+    segmentation:
+        method: standard_ttv
+        params:
+            sequence_ratio:
+            -   train: 0.75
+            -   test: 0.15
+            -   validate: 0.1
+    scaler:
+        name: standard_scaler
+        params:
+            matrix_conversion: true
+            use_std: true
+            use_mean: true
+    model:
+        type: regression
+        name: sklearn_linear
+        params:
+            fit_intercept: true
+    metrics:
+    - rse
+    - mse
+    - rmse
+    - mae
+    - mape
+    - smape
+    - mase

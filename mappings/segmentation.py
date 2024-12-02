@@ -1,4 +1,4 @@
-from common.misc import create_repository, option
+from common.interpreter import create_repository, option
 from components.segmentation import standard_ttv
 
 repository = create_repository({

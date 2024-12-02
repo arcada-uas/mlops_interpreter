@@ -17,7 +17,7 @@ todo
     - [Scalers](mappings/scalers.py)
 3. Reference your functionality in the YAML configuration file.
     - Default: [`pipeline.yaml`](pipeline.yaml)
-    - More examples in `experiments/`
+    - More examples in `runs/`
 4. Automatically unittest the pipeline composition using your yaml config.
     - `make test`
     - If some tests fail, fix the yaml parameter based on the error message.

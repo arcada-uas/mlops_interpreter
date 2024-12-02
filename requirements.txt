@@ -4,8 +4,7 @@ cassandra-driver
 numpy
 pydantic
 
-black
-assertpy
+# ML FRAMEWORKS
 scikit-learn
 xgboost
 catboost

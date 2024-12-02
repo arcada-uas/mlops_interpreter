@@ -1,22 +1,23 @@
 from components.features.base_feature import base_feature
-from common.testing import base_unittest, validate_params
-from pandas import DataFrame
+from common.pydantic import base_schema, Field
+from common.testing import base_unittest
 import random, time, numpy as np
-from pydantic import BaseModel, Field
+from pandas import DataFrame
 
-class input_schema(BaseModel):
+##############################################################################################################
+##############################################################################################################
+
+class stochastic_k_schema(base_schema):
     window_size: int = Field(ge=1)
     output_column: str = Field(min_length=3, max_length=20)
-
-# TODO: FORCE WINDOW SIZE TO BE 1 OR LARGER
-# TODO: FORCE OUTPUT COL TO BE AT LEAST 3 CHARS
 
 ##############################################################################################################
 ##############################################################################################################
 
 class custom_feature(base_feature):
-    def __init__(self, input_params: dict):
-        params = validate_params(input_params, input_schema)
+    def __init__(self, window_size: int, output_column: str):
+        params = stochastic_k_schema(window_size, output_column)
+        
         self.window_size = params.window_size
         self.output_column = params.output_column
 
@@ -48,11 +49,11 @@ class custom_feature(base_feature):
 
 class tests(base_unittest):
     def test_00_validate_input(self):
-        custom_feature(self.input_params)
+        stochastic_k_schema(**self.yaml_params)
 
     def test_01_demo(self):
-        window_size = self.input_params['window_size']
-        output_column = self.input_params['output_column']
+        window_size = self.yaml_params['window_size']
+        output_column = self.yaml_params['output_column']
 
         # MAKE DATASET SIZE LARGER THAN WINDOW SIZE
         init_dataset_length = window_size + 5 # + random.randrange(10, 50)
@@ -69,7 +70,7 @@ class tests(base_unittest):
         } for x in range(init_dataset_length)])
 
         # INSTANTIATE THE FEATURE & TRANSFORM THE DATAFRAME
-        custom_feature(self.input_params).transform(dataset)
+        custom_feature(**self.yaml_params).transform(dataset)
 
         # MAKE SURE THE LENGTH OF THE DATASET HASNT CHANGED
         # PREVENTS FEATURE FROM USING df.dropna()
@@ -96,9 +97,9 @@ class tests(base_unittest):
 
         # MAKE SURE A SAMPLE DATASET WAS PROVIDED BY THE PARENT PROCESS
         sample_error = f"UNITTEST ERROR: SAMPLE DATASET MISSING"
-        self.assertIn('_sample_dataset', self.input_params, msg=sample_error)
+        self.assertTrue(hasattr(self, 'sample_dataset'), msg=sample_error)
 
-        dataset: DataFrame = self.input_params['_sample_dataset']
+        dataset: DataFrame = self.sample_dataset
         dataset_columns = list(dataset.columns)
         required_column = ['low', 'high', 'close']
 

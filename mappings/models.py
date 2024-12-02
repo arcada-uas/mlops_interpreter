@@ -1,29 +1,31 @@
-from common.misc import create_repository, option
-from components.models import catboost_regressor, linear_regression, svr_regressor, mlp_regressor, xgboost_regressor, nlinear_regressor
+from common.interpreter import create_repository, option
+from components.models.regression import sklearn_linear, xg_boost, svr, cat_boost, mlp
 
 repository = create_repository({
-    'linear_regression': option(
-        linear_regression.custom_model,
-        linear_regression.tests
+
+    # REGRESSION MODELS
+    'regression.sklearn_linear': option(
+        sklearn_linear.custom_model,
+        sklearn_linear.tests
     ),
-    'xgboost_regressor': option(
-        xgboost_regressor.custom_model,
-        xgboost_regressor.tests
+    'regression.xg_boost': option(
+        xg_boost.custom_model,
+        xg_boost.tests
     ),
-    'svr_regressor': option(
-        svr_regressor.custom_model,
-        svr_regressor.tests
+    'regression.mlp': option(   
+        mlp.custom_model,
+        mlp.tests
     ),
-    'catboost_regressor': option(
-        catboost_regressor.custom_model,
-        catboost_regressor.tests
+    'regression.svr': option(
+        svr.custom_model,
+        svr.tests
     ),
-    'mlp_regressor': option(
-        mlp_regressor.custom_model,
-        mlp_regressor.tests
+    'regression.cat_boost': option(
+        cat_boost.custom_model,
+        cat_boost.tests
     ),
-    'nlinear_regressor': option(
-        nlinear_regressor.custom_model,
-        nlinear_regressor.tests
-    )
+
+    # CLASSIFICATION MODELS
+    # ...
+
 }, label='model')

@@ -1,6 +1,6 @@
-from common.misc import create_repository, option
-from components.features import shift_column, stochastic_k
-from components.features import to_dataframe, drop_nan_rows, extract_columns
+from common.interpreter import create_repository, option
+from components.features.standard import shift_column, stochastic_k
+from components.features.hidden import drop_nan_rows, extract_features, to_dataframe
 
 repository = create_repository({
 
@@ -23,8 +23,8 @@ repository = create_repository({
         drop_nan_rows.custom_feature,
         drop_nan_rows.tests
     ),
-    'extract_columns': option(
-        extract_columns.custom_feature,
-        extract_columns.tests
+    'extract_features': option(
+        extract_features.custom_feature,
+        extract_features.tests
     ),
 }, label='feature')

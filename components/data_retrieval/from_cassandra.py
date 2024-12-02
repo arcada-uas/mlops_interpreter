@@ -1,14 +1,24 @@
-from pydantic import BaseModel
-from common import cassandra_utils, misc
+from common.pydantic import base_schema
+from common import cassandra, misc
 from common.testing import base_unittest
-from assertpy import assert_that
 import random
 
-class timestamp_schema(BaseModel):
+# dataset:
+#     method: from_cassandra
+#     params:
+#         db_table: shohel.refined_stock_data
+#         stock_symbol: AAPL
+
+#         # FORMAT: %Y-%m-%d %H:%M:%S
+#         timestamps:
+#             start: '2019-01-01 00:00:00'
+#             end: '2019-01-10 00:00:00'
+
+class timestamp_schema(base_schema):
     start: str
     end: str
 
-class input_schema(BaseModel):
+class cassandra_dataset_schema(base_schema):
     db_table: str
     stock_symbol: str
     timestamps: timestamp_schema
@@ -16,11 +26,8 @@ class input_schema(BaseModel):
 ##############################################################################################################
 ##############################################################################################################
 
-def load_dataset(raw_params: dict, unittest_limit: int = -1):
-
-    # MAKE SURE INPUT PARAMS FOLLOW INTENDED SCHEMA
-    assert_that(raw_params).is_type_of(dict)
-    params = input_schema(**raw_params)
+def load_dataset(db_table: str, stock_symbol: str, timestamps: dict, unittest_limit: int = -1):
+    params = cassandra_dataset_schema(db_table, stock_symbol, timestamps)
 
     # STITCH TOGETHER CQL QUERY STRING
     query_string: str = f"""
@@ -39,8 +46,8 @@ def load_dataset(raw_params: dict, unittest_limit: int = -1):
     query_string += " ALLOW FILTERING"
 
     # FETCH THE DATASET FROM CASSANDRA
-    cassandra = cassandra_utils.create_instance()
-    dataset: list[dict] = cassandra.read(query_string)
+    instance = cassandra.create_instance()
+    dataset: list[dict] = instance.read(query_string)
 
     return dataset
 
@@ -49,22 +56,13 @@ def load_dataset(raw_params: dict, unittest_limit: int = -1):
 
 class tests(base_unittest):
     def test_00_input_schema(self):
-
-        # MAKE SURE INPUT IS A DICT
-        dict_error = f"ARG 'input_params' IS OF THE WRONG TYPE"
-        self.assertEqual(type(self.input_params), dict, msg=dict_error)
-
-        # ENFORCE PARAM SCHEMA
-        try:
-            input_schema(**self.input_params)
-        except Exception as error:
-            self.fail(error)
+        cassandra_dataset_schema(**self.yaml_params)
 
     ##############################################################################################################
     ##############################################################################################################
 
     def test_01_timestamp_format(self):
-        for key, value in self.input_params['timestamps'].items():
+        for key, value in self.yaml_params['timestamps'].items():
 
             # CHECK LENGTH FOR '%Y-%m-%d %H:%M:%S' FORMAT
             # length_error = f"TIMESTAMP '{key}' DOES NOT FOLLOW THE FORMAT '%Y-%m-%d %H:%M:%S'"
@@ -74,7 +72,7 @@ class tests(base_unittest):
             # MAKE SURE WE CAN CONVERT IT TO AN UNIX TIMESTAMP
             try:
                 misc.unix_ts(value)
-            except Exception as e:
+            except Exception as error:
                 self.fail(f"TIMESTAMP '{key}' COULD NOT BE CAST TO UNIX FORMAT")
 
     ##############################################################################################################
@@ -83,7 +81,7 @@ class tests(base_unittest):
     def test_02_timestamp_order(self):
 
         # CONVERT DATESTRINGS TO UNIX TIMESTAMPS
-        params = input_schema(**self.input_params)
+        params = cassandra_dataset_schema(**self.yaml_params)
         start_ts: int = misc.unix_ts(params.timestamps.start)
         end_ts: int = misc.unix_ts(params.timestamps.end)
 
@@ -96,7 +94,7 @@ class tests(base_unittest):
 
     def test_03_cassandra_connection(self):
         try:
-            cassandra_utils.create_instance()
+            cassandra.create_instance()
         except Exception as e:
             self.fail('COULD NOT CONNECT TO CASSANDRA CLUSTER')
 
@@ -105,7 +103,7 @@ class tests(base_unittest):
 
     def test_04_ascending_order(self):
         row_limit = random.randrange(50, 150)
-        subset = load_dataset(self.input_params, row_limit)
+        subset = load_dataset(**self.yaml_params, unittest_limit=row_limit)
 
         # LOOP THROUGH SEQUENTIAL ENTRYPAIRS
         for nth in range(1, len(subset)):

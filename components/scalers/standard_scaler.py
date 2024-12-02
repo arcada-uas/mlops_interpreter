@@ -1,10 +1,17 @@
 from components.scalers.base_scaler import base_scaler
-from common.testing import base_unittest, validate_params
+from common.testing import base_unittest
 from sklearn.preprocessing import StandardScaler
-from pydantic import BaseModel
+from common.pydantic import base_schema
 from pandas import DataFrame
 
-class input_schema(BaseModel):
+# scaler:
+#     name: standard_scaler
+#     params:
+#         matrix_conversion: True
+#         use_std: True
+#         use_mean: True
+
+class standard_scaler_schema(base_schema):
     use_std: bool
     use_mean: bool
     matrix_conversion: bool
@@ -13,8 +20,8 @@ class input_schema(BaseModel):
 ##############################################################################################################
 
 class custom_scaler(base_scaler):
-    def __init__(self, input_params: dict):
-        params = validate_params(input_params, input_schema)
+    def __init__(self, use_std: bool, use_mean: bool, matrix_conversion: bool):
+        params = standard_scaler_schema(use_std, use_mean, matrix_conversion)
 
         # SAVE PARAMS IN STATE
         self.mean = params.use_mean
@@ -64,7 +71,7 @@ class custom_scaler(base_scaler):
 
 class tests(base_unittest):
     def test_00_input_params(self):
-        custom_scaler(self.input_params)
+        custom_scaler(**self.yaml_params)
 
     def test_01_df_to_feature_matrix(self):
         dataset = DataFrame([{
@@ -74,11 +81,11 @@ class tests(base_unittest):
 
         # GENERATE THE FEATURE MATRIX
         # OF THE OPEN & CLOSE COLUMNS
-        real_output = custom_scaler({
-            'use_std': True,
-            'use_mean': True,
-            'matrix_conversion': True
-        }).df_to_matrix(dataset)
+        real_output = custom_scaler(
+            use_std=True,
+            use_mean=True,
+            matrix_conversion=True
+        ).df_to_matrix(dataset)
 
         # WHAT WE EXPECT TO RECEIVE
         expected_output = [

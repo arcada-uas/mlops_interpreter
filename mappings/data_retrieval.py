@@ -1,4 +1,4 @@
-from common.misc import create_repository, option
+from common.interpreter import create_repository, option
 from components.data_retrieval import from_cassandra
 
 repository = create_repository({

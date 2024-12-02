@@ -1,33 +1,38 @@
 TODO
-    UNITTEST LABEL GENERATION
-    WRITE FROM_CSV RETRIEVAL METHOD
-    WRITE A SYNTH DATASET FUNCTION THAT USES make_regression
-    IMPLEMENT THE OTHER METRICS -- CONSIDER UNITTEST FORMAT
+    UPDATE UNITTESTS TO USE UNIFIED SYNTH DATASET FUNC
 
-    ADD DESCRIPTIONS TO EACH FEATURE/MODEL
-    f```
-        name: xg_boost_regression
-        params:
-            n_estimators: 5
-            max_depth: 2
-            learning_rate: 0.1
-            subsample: 0.8
-    ```
-
-    MAKE UNIFIED TEST + RUN FILE
     INTEGRATE MLFLOW
+    INTEGRATE RAY
+
+    UNITTEST LABEL GENERATION FUNC
+
+    SWITCH TO DARTS METRICS FOR MAPE sMAPE AND MASE
+    https://unit8co.github.io/darts/generated_api/darts.metrics.html
+
+    ADD ENUMERATE TYPES TO PYDANTIC BASE_SCHEMA
+
+    ENFORCE THAT PIPELINE.PREDICT ALWAYS OUTPUTS FLOATS
+        WHAT DO CLASSIFIERS OUTPUT?
+
+    IMPLEMENT MINMAX SCALER
+        with min/max params
 
 ----------------------------------------------------------------------------
 
 BUG FIXES
-    INVESTIGATE AND FIX ERROR RESULTING FROM
-        sequence_ratio:
-            - train: 0.75
-            - test: 0.25
-            - validate: 0
+    FIGURE OUT HOW TO BLOCK TOO SMALL SPLITTING SEGMENTS
+        - train: 0.75
+        - test: 0.24
+        - validate: 0.01
 
 ----------------------------------------------------------------------------
 
 YAML PARAM:
     ADD OPTION TO SETUP GPU ENV?
-    LIMIT NUM OF TRACEBACKS INSTEAD OF TURNING IT OFF?
+
+----------------------------------------------------------------------------
+
+MAYBE LATER
+    DO METRICS NEED TO TESTED? HOW?
+    WRITE FROM_CSV RETRIEVAL METHOD
+    GENERATE PLOTS FOR RUN OVERVIEW
