@@ -29,6 +29,14 @@
 # production
 /build
 
+# Virtual environments
+.env/
+.venv/
+env/
+venv/
+ENV/
+Pipfile.lock
+
 # misc
 .DS_Store
 .env.local

@@ -1,5 +1,6 @@
 from common.interpreter import create_repository, option
 from components.models.regression import sklearn_linear, xg_boost, svr, cat_boost, mlp
+from components.models.classification import svc, xg_boost
 
 repository = create_repository({
 
@@ -24,8 +25,15 @@ repository = create_repository({
         cat_boost.custom_model,
         cat_boost.tests
     ),
-
+    
     # CLASSIFICATION MODELS
-    # ...
+    'classification.svc': option(
+        svc.custom_model,
+        svc.tests
+    ),
+    'classification.xg_boost': option(
+        xg_boost.custom_model,
+        xg_boost.tests
+    ),
 
 }, label='model')

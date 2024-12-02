@@ -4,6 +4,8 @@ cassandra-driver
 numpy
 pydantic
 
+coverage
+
 # ML FRAMEWORKS
 scikit-learn
 xgboost

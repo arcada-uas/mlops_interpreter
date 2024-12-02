@@ -1,3 +1,4 @@
+from abc import ABC, abstractmethod
 from mappings.metrics import repository as metric_options
 
 class base_model:
@@ -9,6 +10,7 @@ class base_model:
     def __repr__(self):
         raise NotImplementedError()
 
+    @abstractmethod
     def fit(self, features, labels=None):
         raise NotImplementedError()
 
@@ -27,7 +29,8 @@ class base_model:
         self._metrics = metrics
 
     # UNIFIED SCORE FUNCTION FOR ALL MODELS
-    # DO NOT OVERWRITE THIS    
+    # DO NOT OVERWRITE THIS
+    @abstractmethod
     def score(self, features, labels):
         assert self.model != None, 'A MODEL HAS NOT BEEN TRAINED YET'
         assert len(self._metrics) > 0, 'NO MODEL METRICS SPECIFIED'
