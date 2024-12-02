@@ -1,5 +1,5 @@
 from common.interpreter import create_repository, option
-from components.scalers import standard_scaler, minmax_scaler
+from components.scalers import minmax_scaler, standard_scaler
 
 repository = create_repository({
     'standard_scaler': option(
@@ -7,7 +7,7 @@ repository = create_repository({
         standard_scaler.tests
     ),
     'minmax_scaler': option(
-        minmax_scaler.scaler,
+        minmax_scaler.custom_scaler,
         minmax_scaler.tests
     ),
 }, label='scaler')

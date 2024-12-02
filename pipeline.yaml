@@ -11,8 +11,6 @@ dataset:
     params:
         db_table: shohel.refined_stock_data
         stock_symbol: AAPL
-
-        # FORMAT: %Y-%m-%d %H:%M:%S
         timestamps:
             start: '2019-01-01 00:00:00'
             end: '2019-01-10 00:00:00'
@@ -33,14 +31,14 @@ dataset:
 features:
 
     # ADD STOCHASTIC K FEATURE
-    -   name: stochastic_k
+    -   method: stochastic_k
         params:
             window_size: 5
             output_column: sk5
 
     # SHIFT CLOSE COLUMN FORWARD BY 14 STEPS
     # THIS WILL BE THE TARGET COLUMN FOR MODEL TRAINING
-    -   name: shift_column
+    -   method: shift_column
         params:
             target_column: close
             shift_by: 14
@@ -74,77 +72,25 @@ training:
 
     # WHAT SCALAR SHOULD WE USE?
     scaler:
-        name: standard_scaler
+        method: standard_scaler
         params:
-            matrix_conversion: True
             use_std: True
             use_mean: True
 
     # WHAT MODEL SHOULD WE USE?
     model:
-        type: regression
-
-        # name: sklearn_linear
-        # params:
-        #     fit_intercept: True
-
-        # name: xg_boost
-        # params:
-        #     n_estimators: 100
-        #     max_depth: 6
-        #     learning_rate: 0.3
-        #     subsample: 1.0
-        #     colsample_bytree: 1.0
-        #     gamma: 0.0
-        #     reg_alpha: 0.0
-        #     reg_lambda: 1.0
-
-        # name: svr
-        # params:
-        #     c_param: 1.0
-        #     epsilon: 0.1
-        #     kernel: rbf
-        #     degree: 3
-        #     gamma: scale
-        #     coef0: 0
-        #     shrinking: True
-        #     tol: 1e-3
-        #     max_iter: -1
-
-        # name: cat_boost
-        # params:
-        #     iterations: 100
-        #     learning_rate: 0.1
-        #     depth: 6
-        #     l2_leaf_reg: 3.0
-        #     loss_func: RMSE
-
-        name: mlp
+        type: classification
+        method: svc
         params:
-            layer_sizes: 
-                - 200
-                - 100
-                - 50
-            activation_func: relu
-            solver_func: adam
-            alpha: 0.001
-            learning_rate: adaptive
-            max_iter: 1000
-            early_stopping: True
-            validation_fraction: 0.1
-            tolerance: 1e-4
+            c_param: 0.1
+            kernel: linear
+            probability: True
 
     # MODEL EVALUATION METRICS
     # AVAILABILITY IS BASED ON WHETHER THE MODEL TYPE
     # WAS SET AS REGRESSION OR CLASSIFICATION
     metrics:
-        - rse
-        - mse
-        - rmse
-        - mae
-        - mape
-        - smape
-        - mase
+        - accuracy
 
 #######################################################################################
 #######################################################################################

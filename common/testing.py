@@ -35,11 +35,11 @@ class StopOnFirstErrorResult(unittest.TextTestResult):
 
         # OVERRIDE UGLY PYDANTIC ERRORS
         if exc_type == pydantic.ValidationError:
-            misc.hide_traces()
             misc.clear_console()
             pretty_error = pydantic.parse_pydantic_error(exc_value)
             err = (AssertionError, AssertionError(pretty_error), something)
          
+        misc.hide_traces()
         super().addError(test, err)
         self.stop()
 
@@ -48,11 +48,11 @@ class StopOnFirstErrorResult(unittest.TextTestResult):
 
         # OVERRIDE UGLY PYDANTIC ERRORS
         if exc_type == pydantic.ValidationError:
-            misc.hide_traces()
             misc.clear_console()
             pretty_error =  pydantic.parse_pydantic_error(exc_value)
             err = (AssertionError, AssertionError(pretty_error), something)
 
+        misc.hide_traces()
         super().addFailure(test, err)
         self.stop()
 
@@ -127,14 +127,12 @@ class create_synth_dataset_schema(pydantic.BaseModel):
     column_names: list[str] = pydantic.Field(min_length=1)
     num_rows: int = pydantic.Field(ge=1)
     random_state: int
-    to_df: bool = False
 
-def create_synth_dataset(column_names: list[str], num_rows: int, random_state: int, to_df: bool):
+def create_synth_dataset(column_names: list[str], num_rows: int, random_state: int, columns_only: bool = False, as_df: bool = True):
     params = create_synth_dataset_schema(
         column_names=column_names,
         num_rows=num_rows,
         random_state=random_state,
-        to_df=to_df,
     )
 
     # GENERATE A FEATURE MATRIX
@@ -155,9 +153,15 @@ def create_synth_dataset(column_names: list[str], num_rows: int, random_state: i
         **dict(zip(params.column_names, row_features)),
     } for nth, row_features in enumerate(float_matrix)]
 
-    # WHEN REQUESTED, CONVERT O DATAFRAME
-    if params.to_df:
-        return DataFrame(dataset)
+    # WHEN REQUESTED, LIST OF DICTS
+    if as_df is not True:
+        return dataset
+    
+    # OTHERWISE, CONVERT TO DATAFRAME
+    dataset = DataFrame(dataset)
 
-    # OTHERWISE, RETURN AS LIST OF DICTS
+    # WHEN REQUESTED, ONLY SPECIFIC COLUMNS
+    if columns_only is True:
+        return dataset[column_names]
+    
     return dataset

@@ -4,15 +4,15 @@ from common.misc import stringified_params
 from pydantic import BaseModel
 from pandas import DataFrame
 
-class input_schema(BaseModel):
+class scaler_input_schema(BaseModel):
     foo: bool
 
 ##############################################################################################################
 ##############################################################################################################
 
 class custom_scaler(base_feature):
-    def __init__(self, input_params: dict):
-        params = validate_params(input_params, input_schema)
+    def __init__(self, foo: bool):
+        params = scaler_input_schema(foo)
         self.foo = params.foo
 
         # SHOULD ALWAYS DEFAULT TO NONE

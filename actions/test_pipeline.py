@@ -46,7 +46,7 @@ def run(yaml_config: types.config_schema):
 
         # APPLY EACH NORMAL FEATURE
         for feature in yaml_config.features:
-            feature_module = feature_options.get_tests(feature.name)
+            feature_module = feature_options.get_tests(feature.method)
             num_tests_ran += testing.run_tests(feature_module, yaml_config.debug.test_verbosity, {
                 **feature.params,
                 '_sample_dataset': sample_dataset
@@ -94,13 +94,13 @@ def run(yaml_config: types.config_schema):
     #####################################################################################
     ### UNITTEST SCALER
 
-        scaler_module = scaler_options.get_tests(yaml_config.training.scaler.name)
+        scaler_module = scaler_options.get_tests(yaml_config.training.scaler.method)
         num_tests_ran += testing.run_tests(scaler_module, yaml_config.debug.test_verbosity, yaml_config.training.scaler.params)
 
     #####################################################################################
     ### UNITTEST MODEL
 
-        model_ref: str = f'{yaml_config.training.model.type}.{yaml_config.training.model.name}'
+        model_ref: str = f'{yaml_config.training.model.type}.{yaml_config.training.model.method}'
         model_module = model_options.get_tests(model_ref)
         num_tests_ran += testing.run_tests(model_module, yaml_config.debug.test_verbosity, yaml_config.training.model.params)
 
