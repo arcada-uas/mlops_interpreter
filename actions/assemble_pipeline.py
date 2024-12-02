@@ -1,4 +1,4 @@
-from common import files, types, misc
+from common import file_utils, types, misc, interpreter
 from sklearn.pipeline import Pipeline
 
 from mappings.data_retrieval import repository as retrieval_options
@@ -6,7 +6,6 @@ from mappings.features import repository as feature_options
 from mappings.models import repository as model_options
 from mappings.scalers import repository as scaler_options
 from mappings.segmentation import repository as segmentation_options
-
 from components.segmentation.generate_labels import generate_segment_labels
 
 ##############################################################################################################
@@ -14,36 +13,31 @@ from components.segmentation.generate_labels import generate_segment_labels
 
 def run(yaml_config: types.config_schema):
     try:
+        misc.print_header('ASSEMBLING PIPELINE')
         pipeline_components = []
-        print('STARTED CONSTRUCTING PIPELINE..\n')
-
-        # HIDE ERROR TRACES TO MAKE ASSERT ERRORS
-        # EASIER TO COMPREHEND AND LOCATE
-        if yaml_config.debug.hide_traces:
-            import sys
-            sys.tracebacklimit = 0
 
     ########################################################################################
     ### LOAD & SEGMENT DATASET
 
         retrieval_method = retrieval_options.get(yaml_config.dataset.method)
-        dataset = []
+        datasets = []
 
         # LIMIT QUERY WHEN UNITTESTING
         if yaml_config.debug.limit_dataset > 0:
-            dataset = retrieval_method(yaml_config.dataset.params, unittest_limit=yaml_config.debug.limit_dataset)
+            datasets = retrieval_method(**yaml_config.dataset.params, unittest_limit=yaml_config.debug.limit_dataset)
         
         # OTHERWISE, FETCH FULL DATASET
         else:
-            dataset = retrieval_method(yaml_config.dataset.params)
+            datasets = retrieval_method(**yaml_config.dataset.params)
 
-        misc.formatted_print(['[1/9] FETCHED DATASET', f'n={len(dataset)}'])
+        misc.formatted_print(['[1/9] FETCHED DATASET', f'n={len(datasets)}'])
 
         # THEN SEGMENT WHATEVER WAS QUERIED
         segmentation_method = segmentation_options.get(yaml_config.training.segmentation.method)
-        dataset = segmentation_method(yaml_config.training.segmentation.params, dataset)
+        datasets = segmentation_method(**yaml_config.training.segmentation.params, dataset=datasets)
 
-        misc.formatted_print(['[2/9] SEGMENTED DATASET', list(dataset.keys())])
+        for segment_name, subset in datasets.items():
+            misc.formatted_print([f"[2/9] CREATED '{segment_name}' SEGMENT", f'n={len(subset)}'])
 
     ########################################################################################
     ### ADD FIRST LAYER OF FEATURES
@@ -57,7 +51,8 @@ def run(yaml_config: types.config_schema):
         # NORMAL -- APPLY EACH CUSTOM FEATURE
         for nth, feature in enumerate(yaml_config.features):
             feature_instance = feature_options.create(feature.name, feature.params)
-            pipeline_components.append((f'{nth}_{feature.name}', feature_instance))
+            feature_label = f'{nth}_{feature.name}'
+            pipeline_components.append((feature_label, feature_instance))
 
             misc.formatted_print([f'[4/9] ADDED STANDARD FEATURE', feature.name])
 
@@ -70,12 +65,12 @@ def run(yaml_config: types.config_schema):
     ########################################################################################
     ### GENERATE LABELS WITH THE CURRENT SET OF FEATURES
 
-        labels: dict[str, list] = generate_segment_labels({
-            'datasets': dataset,
-            'pipeline': pipeline_components,
-            'label_column': yaml_config.training.label_column,
-            'feature_columns': yaml_config.training.feature_columns,
-        })
+        labels, minimum_batch_window = generate_segment_labels(
+            datasets=datasets,
+            pipeline=pipeline_components,
+            label_column=yaml_config.training.label_column,
+            feature_columns=yaml_config.training.feature_columns
+        )
 
         misc.formatted_print(['[6/9] EXTRACTED LABELS', yaml_config.training.label_column])
 
@@ -83,10 +78,10 @@ def run(yaml_config: types.config_schema):
     ### ADD SECOND LAYER OF FEATURES
 
         # HIDDEN -- EXTRACT FEATURE COLUMNS
-        feature_instance = feature_options.create('extract_columns', { 'columns': yaml_config.training.feature_columns })
+        feature_instance = feature_options.create('extract_features', { 'columns': yaml_config.training.feature_columns })
         pipeline_components.append(('hidden_feature_extraction', feature_instance))
 
-        misc.formatted_print(['[7/9] ADDED HIDDEN FEATURE', 'extract_feature_columns'])
+        misc.formatted_print(['[7/9] ADDED HIDDEN FEATURE', 'extract_features'])
 
     ########################################################################################
     ### ADD SCALER & MODEL
@@ -104,6 +99,9 @@ def run(yaml_config: types.config_schema):
         metric_paths = [f'{yaml_config.training.model.type}.{x}' for x in yaml_config.training.metrics]
         model_instance.set_metrics(metric_paths)
 
+        # ADD MINIMUM FEATURE BATCH WINDOW TO MODEL
+        model_instance.set_prediction_window(minimum_batch_window)
+
         # ADD MODEL TO PIPELINE
         pipeline_components.append(('model', model_instance))
 
@@ -113,19 +111,17 @@ def run(yaml_config: types.config_schema):
     ### ALL COMPONENTS GATHERED, CONVERT IT TO THE PROPER PIPELEINE FORMAT
 
         pipeline = Pipeline(pipeline_components)
-        print('\n..PIPELINE COMPLETE')
+        return True, pipeline, datasets, labels, minimum_batch_window
 
-        return pipeline, dataset, labels
+    except Exception as error:
+        interpreter.handle_errors(error)
+        return False, None, None, None, None
 
-    # OTHERWISE, AT LEAST ONE TEST FAILED
-    # THEREFORE, BLOCK THE EXPERIMENT
-    except AssertionError as error:
-        print(f'\nINTERPRETER-SIDE ASSERTION ERROR:')
-        print('----------------------------------------------------------------------')
-        print(error)
+##############################################################################################################
+##############################################################################################################
 
 # BUILD THE PIPELINE
 if __name__ == '__main__':
-    raw_config: dict = files.load_yaml('pipeline.yaml')
+    raw_config: dict = file_utils.load_yaml('pipeline.yaml')
     yaml_config = types.config_schema(**raw_config)
     run(yaml_config)

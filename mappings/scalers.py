@@ -1,4 +1,4 @@
-from common.misc import create_repository, option
+from common.interpreter import create_repository, option
 from components.scalers import standard_scaler, minmax_scaler
 
 repository = create_repository({

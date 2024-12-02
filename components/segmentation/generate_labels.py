@@ -1,20 +1,21 @@
-from common.testing import base_unittest, validate_params
-from pydantic import BaseModel, Field
+from common.testing import base_unittest
+from common.pydantic import base_schema, Field
 
-class input_schema(BaseModel):
-    datasets: dict[str, list[dict]]
-    pipeline: list[tuple]
+class generate_labels_schema(base_schema):
+    datasets: dict[str, list[dict]] = Field(min_length=1)
+    pipeline: list[tuple] = Field(min_length=1)
     label_column: str = Field(min_length=3)
     feature_columns: list[str] = Field(min_length=1)
 
-##################################################################################################
+##############################################################################################################
 ##############################################################################################################
 
 # APPLY PIPELINE FEATURES ON SUBSET
 # AND EXTRACT LABEL COLUMN FROM THE RESULTING DATAFRAME
-def generate_segment_labels(input_params: dict):
-    params = validate_params(input_params, input_schema)
+def generate_segment_labels(datasets: dict, pipeline: list, label_column: str, feature_columns: list):
+    params = generate_labels_schema(datasets, pipeline, label_column, feature_columns)
     container = {}
+    feature_buffers = {}
 
     for segment_name, subset in params.datasets.items():
 
@@ -22,10 +23,19 @@ def generate_segment_labels(input_params: dict):
         # TODO: TEST IF THIS IS NECESSARY
         # TODO: TEST IF THIS IS NECESSARY
         cloned_dataset = [x for x in subset]
+        
+        original_length = len(cloned_dataset)
 
         # APPLY EACH FEATURE
         for _, feature in params.pipeline:
             cloned_dataset = feature.transform(cloned_dataset)
+
+        length_error = f"SEGMENT '{segment_name}' IS TOO SMALL TO PRODUCE ONE FULL ROW OF FEATURES.\nSOLUTION: INCREASE PERCENTAGE OR SET TO ZERO."
+        assert len(cloned_dataset) > 0, length_error
+
+        # FIND HOW MANY ROWS WERE CUT FORM THE DATASET
+        # DUE TO FEATURE WINDOWS
+        feature_buffers[segment_name] = original_length - len(cloned_dataset)
 
         # MAKE SURE LABEL COLUMN EXISTS
         df_columns = list(cloned_dataset.columns)
@@ -40,7 +50,10 @@ def generate_segment_labels(input_params: dict):
         for column_name in params.feature_columns:
             assert column_name in df_columns, f"FEATURE COLUMN '{column_name}' DOES NOT EXIST\nOPTIONS: {df_columns}"
 
-    return container
+    # FIND HOW MANY ROWS ARE REQUIRED TO MAKE ONE FULL ROW OF FEATURES
+    minimum_row_count = max(feature_buffers.values())
+    
+    return container, minimum_row_count
 
 ##############################################################################################################
 ##############################################################################################################

@@ -1,33 +1,38 @@
-from pydantic import BaseModel, Field
+from common.pydantic import base_schema, Field
 from components.models.base_model import base_model
-from common.testing import base_unittest, validate_params
+from common.testing import base_unittest
 
-class input_schema(BaseModel):
-    foo: float = Field(ge=0)
+class model_input_schema(base_schema):
+    foo: str = Field(min_length=3)
+    bar: int = Field(gt=5)
 
 ##############################################################################################################
 ##############################################################################################################
 
 class custom_model(base_model):
-    def __init__(self, input_params: dict):
-        params = validate_params(input_params, input_schema)
+    def __init__(self, foo: str, bar: int):
+
+        # VALIDATE INPUTS
+        params = model_input_schema(foo, bar)
+
+        # SAVE PARAMS IN STATE
         self.foo = params.foo
+        self.bar = params.bar
+
+        # MUST DEFAULT TO NONE
         self.model = None
 
     def __repr__(self):
-        return f'my_model(foo={self.foo})'
+        return f'my_model({
+            self.stringify_vars(['foo', 'bar'])
+        })'
 
     def fit(self, features: list[list[float]], labels: list[float] = None):
-        assert self.model == None, 'A MODEL HAS ALREADY BEEN TRAINED'
-        pass
-
-    def predict(self, features: list[list[float]]):
-        assert self.model != None, 'A MODEL HAS NOT BEEN TRAINED YET'
-        pass
+        self.pre_fitting_asserts(features, labels)
     
 ##############################################################################################################
 ##############################################################################################################
 
 class tests(base_unittest):
     def test_00_validate_input(self):
-        custom_model(self.input_params)
+        custom_model(**self.yaml_params)

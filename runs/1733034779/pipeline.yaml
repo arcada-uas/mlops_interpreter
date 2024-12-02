@@ -1,7 +1,5 @@
 debug:
-    hide_traces: false
-    create_logfiles: true
-    limit_dataset: 250
+    create_local_files: true
     test_verbosity: 2
 dataset:
     method: from_cassandra

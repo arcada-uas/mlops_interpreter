@@ -1,5 +1,4 @@
 class base_scaler:
-
     def fit(self, features, labels=None):
         raise NotImplementedError()
 

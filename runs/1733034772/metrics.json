@@ -47,8 +47,8 @@
         "stochastic_k(window_size=5)",
         "shift_column(target_column=close, shift_by=14)",
         "drop_nan_rows()",
-        "extract_columns(columns=['open', 'close', 'high', 'low', 'volume', 'sk5'])",
+        "extract_features(open, close, high, low, volume, sk5)",
         "standard_scaler(std=True, mean=True, matrix_conversion=True)",
-        "linear_regression(fit_intercept=True)"
+        "linear_regression(fit_intercept=True, prediction_window=14)"
     ]
 }

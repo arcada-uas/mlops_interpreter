@@ -1,22 +1,22 @@
-from pydantic import BaseModel, Field
 from components.features.base_feature import base_feature
-from common.testing import base_unittest, validate_params
+from common.pydantic import base_schema, Field
+from common.testing import base_unittest
 from pandas import DataFrame
 import random, time
 
-class input_schema(BaseModel):
+class extract_features_schema(base_schema):
     columns: list[str] = Field(min_length=1)
 
 ##############################################################################################################
 ##############################################################################################################
 
 class custom_feature(base_feature):
-    def __init__(self, input_params: dict):
-        params = validate_params(input_params, input_schema)
+    def __init__(self, columns: list[str]):
+        params = extract_features_schema(columns)
         self.columns = params.columns
         
     def __repr__(self):
-        return f'extract_columns(columns={self.columns})'
+        return f'extract_features({ ', '.join(self.columns) })'
     
     def transform(self, dataframe: DataFrame):
         df_columns = list(dataframe.columns)
@@ -33,7 +33,7 @@ class custom_feature(base_feature):
 
 class tests(base_unittest):
     def test_00_input_schema(self):
-        custom_feature(self.input_params)
+        extract_features_schema(**self.yaml_params)
 
     def test_01_demo(self):
         dataset_length = random.randrange(25, 50)
@@ -55,7 +55,7 @@ class tests(base_unittest):
 
         # CONVERT TO DATAFRAME & PASS IT THROUGH THE FEATURE
         dataset_df = DataFrame(dataset)
-        dataset_df = custom_feature({ 'columns': ['open', 'close'] }).transform(dataset_df)
+        dataset_df = custom_feature(columns=['open', 'close']).transform(dataset_df)
 
         # MAKE SURE OUTPUT CONTENTS MATCH EXPECTATION
         self.assertEqual(dataset_df.to_dict(orient='records'), expected_output)

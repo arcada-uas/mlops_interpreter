@@ -4,11 +4,11 @@ install:
 test:
 	clear && python3 -m actions.test_pipeline
 
-create:
-	clear && python3 -m actions.create_pipeline
+assemble:
+	clear && python3 -m actions.assemble_pipeline
 
-train:
-	clear && python3 -m actions.train_pipeline
+complete:
+	clear && python3 -m actions.complete_run
 
 push:
 	@echo "Commit message?"; \

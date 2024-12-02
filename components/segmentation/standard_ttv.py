@@ -1,38 +1,38 @@
-import math
+from common.pydantic import base_schema, Field
 from common.testing import base_unittest
-from pydantic import BaseModel, Field
+import math
 
 # segmentation:
 #     method: standard_ttv
 #     params:
-#         sequence_ratio:
+#         segments:
 #             - train: 0.75
 #             - test: 0.15
 #             - validate: 0.1
 
-class input_schema(BaseModel):
-    sequence_ratio: list[dict[str, float]] = Field(min_length=3, max_length=3)
+class standard_ttv_schema(base_schema):
+    segments: list[dict[str, float]] = Field(min_length=3, max_length=3)
 
 ##############################################################################################################
 ##############################################################################################################
 
-def segment_dataset(input_params: dict, dataset: list[dict]):
-    assert isinstance(input_params, dict), f"ARG 'input_params' MUST BE OF TYPE DICT, GOT ({type(input_params)})"
-    assert isinstance(dataset, list), f"ARG 'dataset' MUST BE OF TYPE DICT, GOT ({type(dataset)})"
-
-    # MAKE SURE INPUT PARAMS FOLLOW SCHEMA
-    params = input_schema(**input_params)
+def segment_dataset(segments: list[dict[str, float]], dataset: list[dict]):
+    standard_ttv_schema(segments)
 
     # AUDIT THE SEQUENCE -- DIE IF IT FAILS
-    audit_sequence(params.sequence_ratio)
+    audit_segments(segments)
 
     container = {}
     old_limit = 0
     dataset_length = len(dataset)
 
     # LOOP THROUGH EACH SEQUENTIAL SEGMENT
-    for block in params.sequence_ratio:
+    for block in segments:
         for segment_name, segment_percentage in block.items():
+
+            # SKIP UNWANTED SEGMENTS
+            if segment_percentage == 0:
+                continue
 
             # HOW MANY ROWS DOES THE PERCENTAGE TRANSLATE TO?
             num_rows = math.ceil(dataset_length * segment_percentage)
@@ -47,12 +47,12 @@ def segment_dataset(input_params: dict, dataset: list[dict]):
 
     return container
 
-def audit_sequence(sequence: list[dict[str, float]]):
+def audit_segments(segments: list[dict[str, float]]):
     required_segments = set(['train', 'test', 'validate'])
     found_segments = set()
     total_sum = 0
 
-    for item in sequence:
+    for item in segments:
 
         # MAKE SURE ITEM IS ONE DIMENSIONAL
         prop_type, prop_len = type(item), len(item)
@@ -85,19 +85,19 @@ def audit_sequence(sequence: list[dict[str, float]]):
 
 class tests(base_unittest):
     def test_00_input_schema(self):
-        input_schema(**self.input_params)
+        standard_ttv_schema(**self.yaml_params)
 
     def test_01_sequence_audit_passes(self):
-        audit_sequence(self.input_params['sequence_ratio'])
+        audit_segments(self.yaml_params['segments'])
 
-    def mock_run(self, mock_input):
+    def mock_run(self, segments: list[dict], dataset: list, expected_output: dict[str, list]):
 
         # SEGMENT USING THE REAL FUNCTION
-        segments = segment_dataset({ 'sequence_ratio': mock_input['sequence_ratio'] }, mock_input['dataset'])
+        segments = segment_dataset(segments, dataset)
         reconstructed_dataset = []
 
         for segment_name, segment_subset in segments.items():
-            expected_length = mock_input['expected_output'][segment_name]
+            expected_length = expected_output[segment_name]
             subset_length = segment_subset
 
             # APPEND SUBSET TO SEPARATE ARRAY FOR LATER VERIFICATION
@@ -109,64 +109,64 @@ class tests(base_unittest):
 
         # MAKE SURE THERE ARE NO DUPLICATES OR LOST VALUES
         unequal_error = f"RECONSTRUCTED DATASET IS NOT EQUAL TO INPUT DATASET"
-        self.assertEqual(reconstructed_dataset, mock_input['dataset'], msg=unequal_error)
+        self.assertEqual(reconstructed_dataset, dataset, msg=unequal_error)
 
     def test_02_train_test_validate(self):
-        self.mock_run({
-            'dataset': [x for x in range(100)],
-            'sequence_ratio': [
+        self.mock_run(
+            dataset=[x for x in range(100)],
+            segments=[
                 { 'train': 0.75 },
                 { 'test': 0.15 },
                 { 'validate': 0.1 },
             ],
-            'expected_output': {
+            expected_output={
                 'train': [x for x in range(75)],
                 'test': [x for x in range(75, 90)],
                 'validate': [x for x in range(90, 100)],
             }
-        })
+        )
 
     def test_03_test_train_validate(self):
-        self.mock_run({
-            'dataset': [x for x in range(69)],
-            'sequence_ratio': [
+        self.mock_run(
+            dataset=[x for x in range(69)],
+            segments=[
                 { 'test': 0.19 },
                 { 'train': 0.55 },
                 { 'validate': 0.26 },
             ],
-            'expected_output': {
+            expected_output={
                 'test': [x for x in range(14)],
                 'train': [x for x in range(14, 52)],
                 'validate': [x for x in range(52, 69)],
             }
-        })
+        )
 
     def test_04_test_validate_train(self):
-        self.mock_run({
-            'dataset': [x for x in range(420)],
-            'sequence_ratio': [
+        self.mock_run(
+            dataset=[x for x in range(420)],
+            segments=[
                 { 'test': 0.32 },
                 { 'validate': 0.118 },
                 { 'train': 0.562 },
             ],
-            'expected_output': {
+            expected_output={
                 'test': [x for x in range(135)],
                 'validate': [x for x in range(135, 185)],
                 'train': [x for x in range(185, 420)],
             }
-        })
+        )
 
     def test_05_no_validation(self):
-        self.mock_run({
-            'dataset': [x for x in range(123)],
-            'sequence_ratio': [
+        self.mock_run(
+            dataset=[x for x in range(123)],
+            segments=[
                 { 'train': 0.5 },
                 { 'test': 0.5 },
                 { 'validate': 0 },
             ],
-            'expected_output': {
+            expected_output={
                 'train': [x for x in range(62)],
                 'test': [x for x in range(62, 123)],
                 'validate': [],
             }
-        })
+        )

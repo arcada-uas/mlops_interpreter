@@ -1,4 +1,4 @@
-from common.misc import create_repository, option
+from common.interpreter import create_repository, option
 from components.metrics import regression, classification
 
 repository = create_repository({

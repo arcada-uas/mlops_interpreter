@@ -1,7 +1,7 @@
 from abc import ABC
 from pandas import DataFrame
+from common import pydantic, misc
 from sklearn.datasets import make_regression
-from pydantic import BaseModel, Field
 import unittest, os, json, time
 
 # THE ENVIRONMENT VAR THAT UNITTESTS REQUIRE TO OBTAIN DYNAMIC ARGUMENTS
@@ -13,57 +13,60 @@ env_var_name: str = '_UNITTEST_ARGS'
 # SHARED CONSTRUCTOR FOR ALL UNITTESTS
 class base_unittest(unittest.TestCase, ABC):
     def setUp(self):
+
+        # SAVE MODULE YAML PARAMS IN STATE
         stringified_dict: str = os.environ.get(env_var_name)
-        self.input_params: dict = json.loads(stringified_dict)
+        parsed_params: dict = json.loads(stringified_dict)
 
-        # HANDLE SAMPLE DATASET FORMATTING
-        if '_sample_dataset' in self.input_params:
-            self.input_params['_sample_dataset'] = DataFrame(self.input_params['_sample_dataset'])
+        # EXTRACT & SAVE THE SAMPLE DATASET WHEN ONE WAS PROVIDED
+        if '_sample_dataset' in parsed_params:
+            self.sample_dataset = DataFrame(parsed_params['_sample_dataset'])
+            del parsed_params['_sample_dataset']
 
-    # COMPARE TWO DICTS FOR SCHEMATIC DIFFERENCES
-    def validate_schema(self, user_dict: dict, ref_dict: dict, root_path=''):
-        for key in ref_dict.keys():
-
-            # CONSTRUCT KEY PATH FOR DEBUGGING CLARITY
-            path: str = f'{root_path}.{key}'
-            if len(root_path) == 0: path = key
-
-            # MAKE SURE THE KEY EXISTS
-            key_error: str = f"KEY '{path}' NOT FOUND"
-            self.assertTrue(key in user_dict, msg=key_error)
-
-            # KEEP UNRAVELING DICTS
-            if isinstance(ref_dict[key], dict):
-                self.validate_schema(user_dict[key], ref_dict[key], path)
-
-            # OTHERWISE, VERIFY THAT VALUE TYPE IS CORRECT
-            else:
-                value_type = type(user_dict[key])
-                expected_type = ref_dict[key]
-
-                value_error: str = f"KEY VALUE '{path}' IS OF WRONG TYPE"
-                self.assertEqual(value_type, expected_type, msg=value_error)
+        # SAVE THE REMAINING PARAMS IN STATE
+        self.yaml_params: dict = parsed_params
 
 ################################################################################################
 ################################################################################################
 
 class StopOnFirstErrorResult(unittest.TextTestResult):
     def addError(self, test, err):
+        exc_type, exc_value, something = err
+
+        # OVERRIDE UGLY PYDANTIC ERRORS
+        if exc_type == pydantic.ValidationError:
+            misc.hide_traces()
+            misc.clear_console()
+            pretty_error = pydantic.parse_pydantic_error(exc_value)
+            err = (AssertionError, AssertionError(pretty_error), something)
+         
         super().addError(test, err)
-        self.stop()  # Stop further tests on error
+        self.stop()
 
     def addFailure(self, test, err):
-        super().addFailure(test, err)
-        self.stop()  # Stop further tests on failure
+        exc_type, exc_value, something = err
 
-def run_tests(module, verbosity_level, input_params: dict):
+        # OVERRIDE UGLY PYDANTIC ERRORS
+        if exc_type == pydantic.ValidationError:
+            misc.hide_traces()
+            misc.clear_console()
+            pretty_error =  pydantic.parse_pydantic_error(exc_value)
+            err = (AssertionError, AssertionError(pretty_error), something)
+
+        super().addFailure(test, err)
+        self.stop()
+
+################################################################################################
+################################################################################################
+
+def run_tests(module, verbosity_level: int, yaml_params: dict):
 
     # HANDLE SAMPLE DATASET FORMATTING
-    if '_sample_dataset' in input_params:
-        input_params['_sample_dataset'] = input_params['_sample_dataset'].to_dict(orient='records')
+    if '_sample_dataset' in yaml_params:
+        yaml_params['_sample_dataset'] = yaml_params['_sample_dataset'].to_dict(orient='records')
 
     # MAKE INPUT ARGS AVAILABLE FOR THE UNITTESTS THROUGH ENVIRONMENT
-    os.environ[env_var_name] = json.dumps(input_params)
+    os.environ[env_var_name] = json.dumps(yaml_params)
 
     # CREATE THE TESTING SUITE
     suite = unittest.TestSuite()
@@ -79,7 +82,7 @@ def run_tests(module, verbosity_level, input_params: dict):
 
     # KILL PARENT PROCESS IF YOU FIND ANY ERRORS/FAILS
     if len(output.errors) > 0 or len(output.failures) > 0:
-        raise Exception(output)
+        raise Exception('UNITTEST_ERROR')     
 
     # OTHERWISE, RETURN THE NUMBER OF TESTS THAT WERE RAN 
     return output.testsRun
@@ -87,34 +90,7 @@ def run_tests(module, verbosity_level, input_params: dict):
 ################################################################################################
 ################################################################################################
 
-# COMPARE TWO DICTS FOR SCHEMATIC DIFFERENCES
-def validate_schema(user_dict: dict, ref_dict: dict, root_path=''):
-    for key in ref_dict.keys():
-
-        # CONSTRUCT KEY PATH FOR DEBUGGING CLARITY
-        path: str = f'{root_path}.{key}'
-        if len(root_path) == 0: path = key
-
-        # MAKE SURE THE KEY EXISTS
-        key_error: str = f"KEY '{path}' NOT FOUND"
-        assert key in user_dict, key_error
-
-        # KEEP UNRAVELING DICTS
-        if isinstance(ref_dict[key], dict):
-            validate_schema(user_dict[key], ref_dict[key], path)
-
-        # OTHERWISE, VERIFY THAT VALUE TYPE IS CORRECT
-        else:
-            value_type = type(user_dict[key])
-            expected_type = ref_dict[key]
-
-            value_error: str = f"KEY '{path}' IS OF WRONG TYPE"
-            assert value_type == expected_type, value_error
-
-################################################################################################
-################################################################################################
-
-def build_and_validate_schema(sample_row, expected_schema):
+def validate_expected_schema(sample_row: dict, expected_schema: dict):
     reference_schema = {}
 
     # YAML REFERS TO TYPES BY STRING NAME
@@ -125,51 +101,48 @@ def build_and_validate_schema(sample_row, expected_schema):
     }
 
     # BUILD THE REFERENCE SCHEMA
+    # SWAP STRINGIFIED TYPES WITH REAL TYPES
     for key, key_type in expected_schema.items():
-        key_error = f"TYPE '{key_type}' FOR COLUMN '{key}' MISSING FROM UNITTEST TYPE MAPPING"
+        key_error = f"TYPE '{key_type}' FOR DATASET COLUMN '{key}' MISSING FROM UNITTEST TYPE MAPPING\nSOLUTION: IF THE TYPE IS CORRECT, ADD IT MANUALLY"
         assert key_type in type_mapping, key_error
         reference_schema[key] = type_mapping[key_type]
 
-    # MAKE SURE EACH ROW SCHEMA MATCHES
-    validate_schema(sample_row, reference_schema)
+    for key in reference_schema.keys():
+
+        # MAKE SURE THE COLUMN EXISTS
+        key_error: str = f"DATASET COLUMN '{key}' NOT FOUND IN DATASET"
+        assert key in sample_row, key_error
+
+        value_type = type(sample_row[key])
+        expected_type = reference_schema[key]
+
+        # MAKE SURE ITS OF THE CORRECT TYPE
+        value_error: str = f"DATASET COLUMN '{key}' IS OF WRONG TYPE\nEXPECTED {expected_type}, FOUND {value_type}"
+        assert value_type == expected_type, value_error
 
 ################################################################################################
 ################################################################################################
 
-# VALIDATE INPUT DICT WITH GIVEN PYDANTIC SCHEMA
-def validate_params(input_dict, input_schema):
-    assert isinstance(input_dict, dict), f"ARG 'input_params' MUST BE OF TYPE DICT, GOT {type(input_dict)}"
-    return input_schema(**input_dict)
+class create_synth_dataset_schema(pydantic.BaseModel):
+    column_names: list[str] = pydantic.Field(min_length=1)
+    num_rows: int = pydantic.Field(ge=1)
+    random_state: int
+    to_df: bool = False
 
-################################################################################################
-################################################################################################
-
-def create_synth_dataset(input_params: dict):
-    """
-        column_names: list[str] = Field(min_length=1)
-        
-        num_rows: int = Field(ge=1)
-
-        random_state: int
-
-        to_df: bool = False
-    """
-
-    class create_synth_dataset_inputs(BaseModel):
-        column_names: list[str] = Field(min_length=1)
-        num_rows: int = Field(ge=1)
-        random_state: int
-        to_df: bool = False
-
-    # VALIDATE INPUTS
-    params = validate_params(input_params, create_synth_dataset_inputs)
+def create_synth_dataset(column_names: list[str], num_rows: int, random_state: int, to_df: bool):
+    params = create_synth_dataset_schema(
+        column_names=column_names,
+        num_rows=num_rows,
+        random_state=random_state,
+        to_df=to_df,
+    )
 
     # GENERATE A FEATURE MATRIX
-    all_features, _ = make_regression(
+    float_matrix, _ = make_regression(
         n_samples=params.num_rows,
         n_features=len(params.column_names),
+        random_state=params.random_state,
         noise=10.0,
-        random_state=params.random_state
     )
 
     # GENERATE A STARTING UNIX TIMESTAMP
@@ -180,7 +153,7 @@ def create_synth_dataset(input_params: dict):
         'symbol': 'SYNTH',
         'timestamp': start_time + nth,
         **dict(zip(params.column_names, row_features)),
-    } for nth, row_features in enumerate(all_features)]
+    } for nth, row_features in enumerate(float_matrix)]
 
     # WHEN REQUESTED, CONVERT O DATAFRAME
     if params.to_df:
