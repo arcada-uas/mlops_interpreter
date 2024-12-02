@@ -147,12 +147,23 @@ training:
     #     - mase
     model:
         type: classification
-        name: svc
+        # name: svc
+        # params:
+        #     C: 0.1
+        #     kernel: linear
+        #     probability: True
+        #     random_state: 42
+
+        name: xg_boost
         params:
-            C: 0.1
-            kernel: linear
-            probability: True
+            n_estimators: 100
+            max_depth: 6
+            learning_rate: 0.1
+            subsample: 0.8
+            eval_metric: logloss
             random_state: 42
+            use_label_encoder: False
+
     metrics:
         - accuracy
         - precision
