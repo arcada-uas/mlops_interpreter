@@ -38,15 +38,15 @@ class custom_feature(base_feature):
         # APPLY QUARTILE LABELING LOGIC
         def assign_label(x):
             if x <= p20:
-                return 0
+                return 0  # Represents the lowest values, potentially "sell"
             elif x <= p45:
-                return 1
+                return 1  # Represents below-average values
             elif x <= p55:
-                return 2
+                return 2  # Represents little change or "hold"
             elif x <= p80:
-                return 3
+                return 3  # Represents above-average values
             else:
-                return 4
+                return 4  # Represents the highest values, potentially "buy"
 
         dataframe[self.output_column] = dataframe[self.target_column].apply(assign_label)
         return dataframe
