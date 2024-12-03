@@ -52,6 +52,12 @@ features:
             target_column: close
             threshold: 0.00005
             output_column: buy_sell
+
+    # ADD LOG RETURN FEATURE
+    -   name: log_return
+        params:
+            target_column: close
+            output_column: log_return
 #######################################################################################
 #######################################################################################
 
@@ -66,6 +72,7 @@ training:
         - volume
         - sk5
         - buy_sell
+        - log_return
 
     # WHAT COLUMN DO WE WANT TO PREDICT
     # label_column: shifted_close
