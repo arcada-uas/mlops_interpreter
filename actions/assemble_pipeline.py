@@ -50,11 +50,11 @@ def run(yaml_config: types.config_schema):
 
         # NORMAL -- APPLY EACH CUSTOM FEATURE
         for nth, feature in enumerate(yaml_config.features):
-            feature_instance = feature_options.create(feature.name, feature.params)
-            feature_label = f'{nth}_{feature.name}'
+            feature_instance = feature_options.create(feature.method, feature.params)
+            feature_label = f'{nth}_{feature.method}'
             pipeline_components.append((feature_label, feature_instance))
 
-            misc.formatted_print([f'[4/9] ADDED STANDARD FEATURE', feature.name])
+            misc.formatted_print([f'[4/9] ADDED STANDARD FEATURE', feature.method])
 
         # HIDDEN -- DROP ROWS WITH NANS
         feature_instance = feature_options.create('drop_nan_rows')
@@ -86,13 +86,13 @@ def run(yaml_config: types.config_schema):
     ########################################################################################
     ### ADD SCALER & MODEL
 
-        scaler_instance = scaler_options.create(yaml_config.training.scaler.name, yaml_config.training.scaler.params)
+        scaler_instance = scaler_options.create(yaml_config.training.scaler.method, yaml_config.training.scaler.params)
         pipeline_components.append(('scaler', scaler_instance))
 
-        misc.formatted_print(['[8/9] ADDED SCALER', yaml_config.training.scaler.name])
+        misc.formatted_print(['[8/9] ADDED SCALER', yaml_config.training.scaler.method])
 
         # FETCH THE DESIRED MODEL
-        model_name_path = f'{yaml_config.training.model.type}.{yaml_config.training.model.name}'
+        model_name_path = f'{yaml_config.training.model.type}.{yaml_config.training.model.method}'
         model_instance = model_options.create(model_name_path, yaml_config.training.model.params)
 
         # ADD MODEL TYPE PREFIX TO METRIC NAMES & PUSH THEM TO MODEL OBJECT

@@ -11,8 +11,6 @@ dataset:
     params:
         db_table: shohel.refined_stock_data
         stock_symbol: AAPL
-
-        # FORMAT: %Y-%m-%d %H:%M:%S
         timestamps:
             start: '2019-01-01 00:00:00'
             end: '2019-01-10 00:00:00'
@@ -33,14 +31,14 @@ dataset:
 features:
 
     # ADD STOCHASTIC K FEATURE
-    -   name: stochastic_k
+    -   method: stochastic_k
         params:
             window_size: 5
             output_column: sk5
 
     # SHIFT CLOSE COLUMN FORWARD BY 14 STEPS
     # THIS WILL BE THE TARGET COLUMN FOR MODEL TRAINING
-    -   name: shift_column
+    -   method: shift_column
         params:
             target_column: close
             shift_by: 14
@@ -82,9 +80,8 @@ training:
 
     # WHAT SCALAR SHOULD WE USE?
     scaler:
-        name: standard_scaler
+        method: standard_scaler
         params:
-            matrix_conversion: True
             use_std: True
             use_mean: True
 

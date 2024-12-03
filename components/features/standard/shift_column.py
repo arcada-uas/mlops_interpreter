@@ -19,7 +19,7 @@ class custom_feature(base_feature):
         self.target_column = params.target_column
         self.shift_by = params.shift_by
         self.output_column = params.output_column
-        
+
     def __repr__(self):
         return f'shift_column(target_column={self.target_column}, shift_by={self.shift_by})'
 
