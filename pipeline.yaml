@@ -64,6 +64,15 @@ features:
         params:
             target_column: close
             output_column: quartile
+
+    # ADD ORACLE FEATURE
+    -   name: oracle
+        params:
+            price_column: close
+            transaction_fee: 0.0004
+            final_label: 1
+            delta: 0.001
+            output_column: oracle
             
 #######################################################################################
 #######################################################################################
@@ -81,11 +90,13 @@ training:
         - buy_sell
         - log_return
         - quartile
+        - oracle
 
     # WHAT COLUMN DO WE WANT TO PREDICT
     # label_column: shifted_close
     # label_column: buy_sell
-    label_column: quartile
+    # label_column: quartile
+    label_column: oracle
 
     # HOW SHOULD THE DATASET BE SEGMENTED?
     segmentation:

@@ -1,5 +1,5 @@
 from common.interpreter import create_repository, option
-from components.features.standard import shift_column, stochastic_k, buy_sell, log_return, quartile
+from components.features.standard import shift_column, stochastic_k, buy_sell, log_return, quartile, oracle
 from components.features.hidden import drop_nan_rows, extract_features, to_dataframe
 
 repository = create_repository({
@@ -24,6 +24,10 @@ repository = create_repository({
     'quartile': option(
         quartile.custom_feature,
         quartile.tests
+    ),
+    'oracle': option(
+        oracle.custom_feature,
+        oracle.tests
     ),
     
     # "HIDDEN" FEATURES
