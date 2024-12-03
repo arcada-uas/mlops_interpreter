@@ -58,6 +58,13 @@ features:
         params:
             target_column: close
             output_column: log_return
+    
+    # ADD QUARTILE FEATURE
+    -   name: quartile
+        params:
+            target_column: close
+            output_column: quartile
+            
 #######################################################################################
 #######################################################################################
 
@@ -73,10 +80,12 @@ training:
         - sk5
         - buy_sell
         - log_return
+        - quartile
 
     # WHAT COLUMN DO WE WANT TO PREDICT
     # label_column: shifted_close
-    label_column: buy_sell
+    # label_column: buy_sell
+    label_column: quartile
 
     # HOW SHOULD THE DATASET BE SEGMENTED?
     segmentation:

@@ -1,5 +1,5 @@
 from common.interpreter import create_repository, option
-from components.features.standard import shift_column, stochastic_k, buy_sell, log_return
+from components.features.standard import shift_column, stochastic_k, buy_sell, log_return, quartile
 from components.features.hidden import drop_nan_rows, extract_features, to_dataframe
 
 repository = create_repository({
@@ -20,6 +20,10 @@ repository = create_repository({
     'log_return': option(
         log_return.custom_feature,
         log_return.tests
+    ),
+    'quartile': option(
+        quartile.custom_feature,
+        quartile.tests
     ),
     
     # "HIDDEN" FEATURES
