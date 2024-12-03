@@ -46,6 +46,12 @@ features:
             shift_by: 14
             output_column: shifted_close
 
+    # ADD BUY SELL FEATURE
+    -   name: buy_sell
+        params:
+            target_column: close
+            threshold: 0.00005
+            output_column: buy_sell
 #######################################################################################
 #######################################################################################
 
@@ -59,9 +65,11 @@ training:
         - low
         - volume
         - sk5
+        - buy_sell
 
     # WHAT COLUMN DO WE WANT TO PREDICT
-    label_column: shifted_close
+    # label_column: shifted_close
+    label_column: buy_sell
 
     # HOW SHOULD THE DATASET BE SEGMENTED?
     segmentation:
@@ -162,13 +170,12 @@ training:
             subsample: 0.8
             eval_metric: logloss
             random_state: 42
-            use_label_encoder: False
 
     metrics:
         - accuracy
         - precision
         - recall
-        - f1_score
+        - f_score
         - roc_auc
 
 #######################################################################################

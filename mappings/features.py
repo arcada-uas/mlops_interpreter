@@ -1,5 +1,5 @@
 from common.interpreter import create_repository, option
-from components.features.standard import shift_column, stochastic_k
+from components.features.standard import shift_column, stochastic_k, buy_sell
 from components.features.hidden import drop_nan_rows, extract_features, to_dataframe
 
 repository = create_repository({
@@ -13,7 +13,11 @@ repository = create_repository({
         stochastic_k.custom_feature,
         stochastic_k.tests
     ),
-
+    'buy_sell': option(
+        buy_sell.custom_feature,
+        buy_sell.tests
+    ),
+    
     # "HIDDEN" FEATURES
     'to_dataframe': option(
         to_dataframe.custom_feature,
